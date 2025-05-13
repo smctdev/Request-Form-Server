@@ -1,0 +1,73 @@
+services:
+  requestform:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: requestform
+    container_name: request-server
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+      - ./:/var/www
+      - ./docker-compose/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - requestform
+
+  mysql:
+    image: mysql:8.0
+    container_name: request-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: request_form
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_RANDOM_ROOT_PASSWORD: ${DB_PASSWORD}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - requestform_data:/var/lib/mysql
+    networks:
+      - requestform
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  request-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: request-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - 8080:80  # Expose phpMyAdmin on port 8080
+    environment:
+      PMA_HOST: mysql  # Use 'mysql' as the service name
+      PMA_USER: smct
+      PMA_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - requestform
+
+  nginx:
+    image: nginx:alpine
+    container_name: request-nginx
+    restart: unless-stopped
+    ports:
+      - 8002:8002
+    volumes:
+      - ./docker-compose/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www
+    networks:
+      - requestform
+
+volumes:
+  requestform_data:
+
+networks:
+  requestform:
+    driver: bridge

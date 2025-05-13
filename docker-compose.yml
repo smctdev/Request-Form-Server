@@ -1,0 +1,42 @@
+services:
+  requestform:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: requestform
+    container_name: request-server
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+      - ./:/var/www
+      - ./docker-compose/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - requestform
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: 172.17.0.1  # Replace with your host's IP if necessary
+      DB_PORT: 3306
+      DB_DATABASE: request_form
+      DB_USERNAME: smct
+      DB_PASSWORD: smct 
+
+  nginx:
+    image: nginx:alpine
+    container_name: request-nginx
+    restart: unless-stopped
+    ports:
+      - 8002:8002
+    volumes:
+      - ./docker-compose/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www
+    networks:
+      - requestform
+
+volumes:
+  requestform_data:
+
+networks:
+  requestform:
+    driver: bridge
