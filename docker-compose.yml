@@ -4,7 +4,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     image: requestform-server
-    container_name: requestform-server
+    #container_name: requestform-server
     restart: unless-stopped
     working_dir: /var/www/
     expose: 
