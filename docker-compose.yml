@@ -26,8 +26,8 @@ services:
       DB_DATABASE: requestform
       DB_USERNAME: smct
       DB_PASSWORD: smct 
-    deploy:
-      replicas: 3  # Set the desired number of replicas
+    # deploy:
+    #   replicas: 3  # Set the desired number of replicas
 
   requestform-nginx:
     image: nginx:alpine
