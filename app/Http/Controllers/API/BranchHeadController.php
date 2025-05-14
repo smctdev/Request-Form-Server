@@ -87,7 +87,7 @@ class BranchHeadController extends Controller
     }
 
 
-    //VIEW Branch Head    
+    //VIEW Branch Head
     public function viewBranchHead($id)
     {
         try {
@@ -111,7 +111,7 @@ class BranchHeadController extends Controller
     {
         try {
 
-            $BranchHead = BranchHead::select('id', 'user_id', 'branch_id')->get();
+            $BranchHead = BranchHead::select('id', 'user_id', 'branch_id')->with('user')->get();
 
             return response()->json([
                 'message' => 'Branch Head retrieved successfully',
