@@ -14,6 +14,10 @@ class AreaManager extends Model
         'branch_id',
     ];
 
+    protected $appends = [
+        'branches'
+    ];
+
     protected $casts = [
         'branch_id' => 'array',
     ];
@@ -28,8 +32,8 @@ class AreaManager extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function branch()
+    public function getBranchesAttribute()
     {
-        return $this->belongsTo(Branch::class, 'branch_id');
+        return Branch::whereIn('id', $this->branch_id)->get();
     }
 }

@@ -89,7 +89,7 @@ class AreaManagerController extends Controller
     }
 
 
-    //VIEW AREA MANAGER    
+    //VIEW AREA MANAGER
     public function viewAreaManager($id)
     {
         try {
@@ -113,7 +113,7 @@ class AreaManagerController extends Controller
     {
         try {
 
-            $areaManager = AreaManager::select('id', 'user_id', 'branch_id')->get();
+            $areaManager = AreaManager::select('id', 'user_id', 'branch_id')->with('user')->get();
 
             return response()->json([
                 'message' => 'Area Manager retrieved successfully',
