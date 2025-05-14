@@ -305,9 +305,9 @@ class RequestFormController extends Controller
                     ['type' => 'approved_by', 'ids' => $approvedByIds]
                 ];
             } else {
-            $approvers = [
-                ['type' => 'approved_by', 'ids' => $approvedByIds]
-            ];
+                $approvers = [
+                    ['type' => 'approved_by', 'ids' => $approvedByIds]
+                ];
             }
 
             // Process each approver (noted_by and approved_by)
@@ -664,8 +664,8 @@ class RequestFormController extends Controller
     public function index()
     {
         try {
-            $currentUserId = auth()->user()->id;
-            $current_branch = auth()->user()->branch_code;
+            $currentUserId = Auth::user()->id;
+            $current_branch = Auth::user()->branch_code;
 
 
             // Fetch request forms where user_id matches the current user's ID
@@ -745,28 +745,28 @@ class RequestFormController extends Controller
                     ->first()?->user;
 
 
-                    $approverName = "No Pending Approver";
+                $approverName = "No Pending Approver";
 
-                    if ($pendingApprover) {
-                        $approverFromFinanceStaff = AVPFinanceStaff::where('staff_id', $pendingApprover->id)->exists();
+                if ($pendingApprover) {
+                    $approverFromFinanceStaff = AVPFinanceStaff::where('staff_id', $pendingApprover->id)->exists();
 
-                        if ($approverFromFinanceStaff) {
-                            $avpUser = User::where('position', 'AVP - Finance')->first();
+                    if ($approverFromFinanceStaff) {
+                        $avpUser = User::where('position', 'AVP - Finance')->first();
 
-                            if ($avpUser) {
-                                $approverName = [
-                                    'approver_name' => "{$avpUser->firstName} {$avpUser->lastName}",
-                                ];
-                            } else {
-                                $approverName = "No AVP Found";
-                            }
-                        }else {
+                        if ($avpUser) {
                             $approverName = [
-                               'approver_name' => "{$pendingApprover->firstName} {$pendingApprover->lastName}",
-
+                                'approver_name' => "{$avpUser->firstName} {$avpUser->lastName}",
                             ];
+                        } else {
+                            $approverName = "No AVP Found";
                         }
+                    } else {
+                        $approverName = [
+                            'approver_name' => "{$pendingApprover->firstName} {$pendingApprover->lastName}",
+
+                        ];
                     }
+                }
 
                 return [
                     'id' => $requestForm->id,
@@ -778,9 +778,9 @@ class RequestFormController extends Controller
                     'noted_by' => $formattedNotedBy,
                     'currency' => $currency,
                     'approved_by' => $formattedApprovedBy,
-                    'requested_by' => auth()->user()->firstName . ' ' . auth()->user()->lastName,
-                    'requested_signature' => auth()->user()->signature,
-                    'requested_position' => auth()->user()->position,
+                    'requested_by' => Auth::user()->firstName . ' ' . Auth::user()->lastName,
+                    'requested_signature' => Auth::user()->signature,
+                    'requested_position' => Auth::user()->position,
                     'attachment' => $requestForm->attachment,
                     'pending_approver' => $approverName,
                     'request_code' => "$branchName-$requestForm->request_code",
