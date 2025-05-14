@@ -8,8 +8,8 @@ services:
     restart: unless-stopped
     working_dir: /var/www/
     volumes:
-     # - ./storage:/var/www/storage
-     # - ./bootstrap/cache:/var/www/bootstrap/cache
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
       - ./:/var/www
       - ./docker-compose/nginx/default.conf:/etc/nginx/nginx.conf
       - /mnt/nvme0n1/requestUploads:/mnt/nvme0n1/requestUploads
@@ -31,6 +31,8 @@ services:
     ports:
       - 8004:8004
     volumes:
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
       - ./docker-compose/nginx/default.conf:/etc/nginx/nginx.conf
       - ./:/var/www
       - /mnt/nvme0n1/requestUploads:/mnt/nvme0n1/requestUploads
@@ -51,7 +53,7 @@ services:
     - requestform-server
     restart: unless-stopped
     container_name: requestform-reverb
-    
+
     networks:
       - requestform-server
 
