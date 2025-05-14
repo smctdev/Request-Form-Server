@@ -10,7 +10,7 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use app\Events\NotificationEvent;
 
 
-class PreviousReturnRequestNotification extends Notification
+class PreviousReturnRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

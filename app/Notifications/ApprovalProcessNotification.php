@@ -10,7 +10,7 @@ use App\Events\NotificationEvent;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
-class ApprovalProcessNotification extends Notification
+class ApprovalProcessNotification extends Notification implements ShouldQueue   
 {
     use Queueable, InteractsWithSockets;
 

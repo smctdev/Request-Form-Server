@@ -11,7 +11,7 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use app\Events\NotificationEvent;
 use Log;
 
-class ReturnRequestNotification extends Notification
+class ReturnRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
