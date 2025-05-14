@@ -15,18 +15,19 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('form_type'); // Store the type of form, e.g., 'cash_advance'
-            $table->json('form_data'); // Store form data in a JSON column 
+            $table->json('form_data'); // Store form data in a JSON column
             $table->string('currency')->default('PHP')->change();
             $table->string('status')->default('Pending');
-            $table->json('attachment'); 
+            $table->json('attachment');
             $table->json('noted_by');
+            $table->string('currency')->default('PHP');
             $table->json('approved_by');
             $table->string('branch_code');
             $table->string('request_code');
             $table->string('completed_code')->nullable();
             $table->softDeletes();
             $table->timestamps();
-            
+
             $table->foreign('user_id')->references('id')->on('users');
             //$table->foreign('approvers_id')->references('id')->on('custom_approvers');
         });
@@ -37,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-       
+
     }
 };
