@@ -54,7 +54,7 @@ class ReturnRequestNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        
+
         Log::info($this->requestForm->created_at);
         $approvalUrl = route('view.single.request.form.for.approval', ['request_form_id' => $this->requestForm->id]);
                     return (new MailMessage)
@@ -94,7 +94,9 @@ class ReturnRequestNotification extends Notification
             'approvalUrl' => $approvalUrl,
             'approverFirstname' =>$this->approverFirstname,
             'approverLastname' =>$this->approverLastname,
-            'comment' =>$this->comment
+            'comment' =>$this->comment,
+            'request_reference' => 'requester',
+            'request_id' => $this->requestForm->id,
         ];
     }
 
