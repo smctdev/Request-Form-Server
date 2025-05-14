@@ -7,6 +7,8 @@ services:
     container_name: requestform-server
     restart: unless-stopped
     working_dir: /var/www/
+    expose: 
+      - 8004 # expose the port
     volumes:
       - ./storage:/var/www/storage
       - ./bootstrap/cache:/var/www/bootstrap/cache
@@ -24,6 +26,8 @@ services:
       DB_DATABASE: requestform
       DB_USERNAME: smct
       DB_PASSWORD: smct 
+    deploy:
+      replicas: 3  # Set the desired number of replicas
 
   requestform-nginx:
     image: nginx:alpine
