@@ -4,11 +4,11 @@ services:
       context: ./
       dockerfile: Dockerfile
     image: requestform-server
-    #container_name: requestform-server
+    container_name: requestform-server
     restart: unless-stopped
     working_dir: /var/www/
-    ports: 
-      - 8004:8004 # expose the port
+    # expose: 
+    #   - 8004 # expose the port
     volumes:
       - ./storage:/var/www/storage
       - ./bootstrap/cache:/var/www/bootstrap/cache
