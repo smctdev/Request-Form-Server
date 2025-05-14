@@ -778,7 +778,7 @@ class RequestFormController extends Controller
                     'noted_by' => $formattedNotedBy,
                     'currency' => $currency,
                     'approved_by' => $formattedApprovedBy,
-                    'requested_by' => auth()->user()->firstName . ' ' . auth()->user()->firstName,
+                    'requested_by' => auth()->user()->firstName . ' ' . auth()->user()->lastName,
                     'requested_signature' => auth()->user()->signature,
                     'requested_position' => auth()->user()->position,
                     'attachment' => $requestForm->attachment,
