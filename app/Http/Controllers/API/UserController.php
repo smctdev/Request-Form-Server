@@ -284,7 +284,7 @@ class UserController extends Controller
     {
         try {
 
-            $users = User::with('areaManagers')->select('id', 'firstname', 'lastname', 'branch_code', 'email', 'username', 'role', 'position', 'contact', 'employee_id', 'branch', 'profile_picture', 'email_verified_at', DB::raw('IF(email_verified_at IS NULL, "Not Verified", "Verified") as verification_status'))->where('role', '!=', 'Admin')->get();
+            $users = User::with('areaManagers', 'branch')->select('id', 'firstname', 'lastname', 'branch_code', 'email', 'username', 'role', 'position', 'contact', 'employee_id', 'branch', 'profile_picture', 'email_verified_at', DB::raw('IF(email_verified_at IS NULL, "Not Verified", "Verified") as verification_status'))->where('role', '!=', 'Admin')->get();
 
             return response()->json([
                 'message' => 'Users retrieved successfully',
