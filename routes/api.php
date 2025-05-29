@@ -18,6 +18,7 @@ use App\Http\Controllers\API\ApproverController;
 use App\Http\Controllers\API\AreaManagerController;
 use App\Http\Controllers\API\ApprovalProcessController;
 use App\Http\Controllers\API\AttachmentController;
+use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\Test\PusherController;
@@ -34,6 +35,10 @@ Route::get("get-role/{id}", [UserController::class, "getRole"])->name("get.user.
 Route::post("password/email", [UserController::class, "sendResetLinkEmail"])->name("password.forgot");
 Route::get("view-branch", [BranchController::class, "viewBranch"])->name('view.branch');
 Route::get('/positions', [PositionController::class, 'index']);
+Route::controller(FeedbackController::class)->group(function () {
+    Route::get('/feedbacks', 'index');
+    Route::post('/send-feedback', 'store');
+});
 
 // PROTECTED
 // REQUEST FORM

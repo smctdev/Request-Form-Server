@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function profile()
+    public function profile(Request $request)
     {
-        $myProfile = Auth::user()->load('branch', 'notedBies.notedBy', 'approvedBies.approvedBy');
+        $myProfile = $request->user()->load('branch', 'notedBies.notedBy', 'approvedBies.approvedBy');
 
         return response([
             'status'    =>      true,
