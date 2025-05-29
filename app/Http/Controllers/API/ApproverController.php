@@ -217,7 +217,7 @@ class ApproverController extends Controller
     public function index()
     {
         try {
-            $approvers = User::with('approverStaffs')->where('role', 'approver')->doesntHave('approverStaffs')->get();
+            $approvers = User::with('approverStaffs', 'branch')->where('role', 'approver')->doesntHave('approverStaffs')->get();
             return response()->json([
                 'message' => 'Approvers retrieved successfully',
                 'data' => $approvers,
