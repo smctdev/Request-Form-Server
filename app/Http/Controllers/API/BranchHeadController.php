@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BranchHead;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class BranchHeadController extends Controller
 {
@@ -16,7 +17,6 @@ class BranchHeadController extends Controller
             $BranchHeads = User::where('position', 'Branch Manager')->get();
 
             return response()->json(['branch_heads' => $BranchHeads], 200);
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch Branch Heads', 'details' => $e->getMessage()], 500);
         }
@@ -27,7 +27,7 @@ class BranchHeadController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'branch_id' => 'required|array',
-            'branch_id.*' => 'required|exists:branches,id',
+            'branch_id.*' => ['required', 'exists:branches,id', 'unique:branches,id'],
         ]);
 
         $user = User::find($request->input('user_id'));
@@ -123,7 +123,6 @@ class BranchHeadController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-
     }
 
     //DELETE Branch Head
@@ -138,7 +137,6 @@ class BranchHeadController extends Controller
             return response()->json([
                 'message' => 'Branch Head deleted successfully',
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'An error occurred while deleting the Branch Head',
