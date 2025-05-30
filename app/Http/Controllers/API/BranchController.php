@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AVPFinanceStaff;
 use Illuminate\Http\Request;
 use App\Models\Branch;
+use App\Models\BranchHead;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 
@@ -46,6 +47,25 @@ class BranchController extends Controller
             'data' => $branch,
 
         ]);
+    }
+
+    public function viewNotInBranchId($id)
+    {
+        $branchHead = BranchHead::where("user_id", $id)->first();
+        $query = Branch::query();
+
+        if (!$branchHead) {
+            return response()->json([
+                "data"    => $query->get(),
+            ], 200);
+        }
+
+        $branches = $query->whereNotIn("id", $branchHead->branch_id)
+            ->get();
+
+        return response()->json([
+            "data"    => $branches,
+        ], 200);
     }
 
     // VIEW BRANCH

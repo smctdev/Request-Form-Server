@@ -11,7 +11,8 @@ class PositionController extends Controller
 {
     public function index()
     {
-        $positions = Position::all();
+        $positions = Position::orderBy('label', 'asc')
+            ->get(['id', 'label', 'value']);
 
         if (count($positions) == 0) {
             return response()->json([
