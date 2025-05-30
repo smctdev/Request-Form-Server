@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
 use App\Models\BranchHead;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,9 +15,38 @@ class BranchHeadController extends Controller
     {
         try {
 
-            $BranchHeads = User::where('position', 'Branch Manager')->get();
+            $BranchHeads = BranchHead::with('user.branch')->get();
 
-            return response()->json(['branch_heads' => $BranchHeads], 200);
+            return response()->json([
+                'data'          => $BranchHeads->map(fn($branchHead) => [
+                    "id"        => $branchHead->id,
+                    "user"      => $branchHead->user,
+                    "branch_id" => $branchHead->branch_id,
+                    "user_id"   => $branchHead->user_id,
+                    "branches"  => Branch::whereIn("id", $branchHead->branch_id)->get(['branch_code'])
+                ])
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch Branch Heads', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getAllBranchHeads()
+    {
+        try {
+
+            $BranchHeads = User::orderBy('firstName', 'asc')
+                ->where('position', 'Branch Manager')
+                ->get();
+
+            return response()->json([
+                'data'          => $BranchHeads->map(fn($branchHead) => [
+                    "id"        => $branchHead->id,
+                    "user"      => $branchHead,
+                    "branch_id" => $branchHead->branch_code,
+                    "user_id"   => $branchHead->id,
+                ]),
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch Branch Heads', 'details' => $e->getMessage()], 500);
         }
@@ -27,7 +57,7 @@ class BranchHeadController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'branch_id' => 'required|array',
-            'branch_id.*' => ['required', 'exists:branches,id', 'unique:branches,id'],
+            'branch_id.*' => ['required', 'exists:branches,id', 'unique:branch_heads,branch_id'],
         ]);
 
         $user = User::find($request->input('user_id'));
@@ -38,9 +68,12 @@ class BranchHeadController extends Controller
             ], 400);
         }
 
-        BranchHead::create([
+        $branchHeadOldBranchId = BranchHead::where('user_id', $user->id)->first();
+
+        BranchHead::updateOrCreate([
             'user_id' => $request->input('user_id'),
-            'branch_id' => $request->input('branch_id'),
+        ], [
+            'branch_id' => $branchHeadOldBranchId ? [...$branchHeadOldBranchId->branch_id, ...$request->input('branch_id')] : $request->input('branch_id'),
         ]);
 
 

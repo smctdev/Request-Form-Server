@@ -22,6 +22,7 @@ use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\Test\PusherController;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('edit-branch/{branch_id}', function ($branch_id) {
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post("add-branch", [BranchController::class, "createBranch"])->name('create.branch');
 
     Route::get("view-branch/{id}", [BranchController::class, "viewBranch"])->name('view.branch');
+    Route::get("/view-branch/{id}/view-branch-not-in-branch-head", [BranchController::class, "viewNotInBranchId"]);
     Route::post("update-branch/{id}", [BranchController::class, "updateBranch"])->name('update.branch');
     Route::delete("delete-branch/{id}", [BranchController::class, "deleteBranch"])->name('delete.branch');
 
@@ -147,4 +149,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/save-approved-noted-by', [ApproverSavedController::class, 'store']);
+    Route::get('/view-branch-heads', [BranchHeadController::class, 'getBranchHeads']);
+    Route::get('/get-all-branch-heads', [BranchHeadController::class, 'getAllBranchHeads']);
 });

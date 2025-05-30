@@ -43,7 +43,7 @@ class User extends Authenticatable
     ];
 
     protected $appends = [
-        'fullName'
+        'fullName',
     ];
 
     /**
@@ -102,7 +102,6 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Branch::class, 'branch_code');
     }
-
     public function areaManagers()
     {
         return $this->hasMany(AreaManager::class);
@@ -121,6 +120,11 @@ class User extends Authenticatable
     public function approvedBies()
     {
         return $this->hasMany(ApprovedBy::class);
+    }
+
+    public function branchHeads()
+    {
+        return $this->hasMany(BranchHead::class);
     }
 
     /**
