@@ -434,7 +434,7 @@ class RequestFormController extends Controller
 
             if ($request->hasFile('new_attachments')) {
                 foreach ($request->file('new_attachments') as $file) {
-                    $attachment_paths[] = $file->store('request_form_attachments', 'd_drive'); // Add new file paths
+                    $attachment_paths[] = $file->store('request_form_attachments', 'public'); // Add new file paths
                 }
             }
 
@@ -450,8 +450,8 @@ class RequestFormController extends Controller
             $removed_attachments = $request->input('removed_attachments', []);
             foreach ($removed_attachments as $path) {
                 // Delete the file from storage
-                if (Storage::disk('d_drive')->exists('request_form_attachments/' . $path)) {
-                    Storage::disk('d_drive')->delete('request_form_attachments/' . $path);
+                if (Storage::disk('public')->exists('request_form_attachments/' . $path)) {
+                    Storage::disk('public')->delete('request_form_attachments/' . $path);
                 }
                 // Remove from the attachment list as well
                 $attachment_paths = array_filter($attachment_paths, function ($existing_path) use ($path) {
@@ -605,7 +605,7 @@ class RequestFormController extends Controller
 
         if ($request->hasFile('attachment')) {
             foreach ($request->file('attachment') as $file) {
-                $filePath = $file->store('request_form_attachments', 'd_drive');
+                $filePath = $file->store('request_form_attachments', 'public');
                 $fileName = $file->getClientOriginalName();
 
                 if (!$filePath) {
@@ -669,7 +669,8 @@ class RequestFormController extends Controller
 
 
             // Fetch request forms where user_id matches the current user's ID
-            $requestForms = RequestForm::where('user_id', $currentUserId)
+            $requestForms = RequestForm::with('user.branch')
+                ->where('user_id', $currentUserId)
                 ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code')
                 ->with('approvalProcess')
                 ->get();
@@ -784,7 +785,8 @@ class RequestFormController extends Controller
                     'attachment' => $requestForm->attachment,
                     'pending_approver' => $approverName,
                     'request_code' => "$branchName-$requestForm->request_code",
-                    'completed_code' => $requestForm->completed_code
+                    'completed_code' => $requestForm->completed_code,
+                    'user'  => $requestForm->user
                 ];
             });
 
