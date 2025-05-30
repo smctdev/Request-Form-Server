@@ -13,7 +13,7 @@ class BranchHeadController extends Controller
     {
         try {
 
-            $BranchHeads = User::where('position', 'Branch Supervisor/Manager')->get();
+            $BranchHeads = User::where('position', 'Branch Manager')->get();
 
             return response()->json(['branch_heads' => $BranchHeads], 200);
 
@@ -32,7 +32,7 @@ class BranchHeadController extends Controller
 
         $user = User::find($request->input('user_id'));
 
-        if ($user->position !== 'Branch Supervisor/Manager') {
+        if ($user->position !== 'Branch Manager') {
             return response()->json([
                 'message' => 'The selected user is not an Branch Head.',
             ], 400);
@@ -71,7 +71,7 @@ class BranchHeadController extends Controller
 
         $user = User::find($request->input('user_id'));
 
-        if ($user->position !== 'Branch Supervisor/Manager') {
+        if ($user->position !== 'Branch Manager') {
             return response()->json([
                 'message' => 'The selected user is not an Branch Head.',
             ], 400);
