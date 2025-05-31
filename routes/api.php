@@ -31,7 +31,7 @@ Route::get('edit-branch/{branch_id}', function ($branch_id) {
 
 // PUBLIC
 Route::post("register", [RegisterController::class, "register"]);
-Route::post("login", [LoginController::class, "login"]);
+Route::post("login", [LoginController::class, "login"])->middleware('custom.throttle:5,1');
 Route::get("get-role/{id}", [UserController::class, "getRole"])->name("get.user.role");
 Route::post("password/email", [UserController::class, "sendResetLinkEmail"])->name("password.forgot");
 Route::get("view-branch", [BranchController::class, "viewBranch"])->name('view.branch');

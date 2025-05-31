@@ -41,20 +41,6 @@ class LoginController extends Controller
             ], 403);
         }
 
-        if (RateLimiter::tooManyAttempts(
-            key: 'loginAttempts:' . $user->id,
-            maxAttempts: 5
-        )) {
-            $seconds = RateLimiter::availableIn('loginAttempts:' . $user->id);
-            return response()->json([
-                'status'  => false,
-                'message' => "You may try again in {$seconds} seconds."
-            ], 429);
-        }
-
-        RateLimiter::increment('loginAttempts:' . $user->id, amount: 1, decaySeconds: 30);
-
-
         if (!$user || $user->email_verified_at === null) {
             return response()->json([
                 'status'        =>          false,
@@ -68,7 +54,7 @@ class LoginController extends Controller
         ])) {
             return response()->json([
                 'status'  => false,
-                'message' => 'Email or password does not match our records.',
+                'message' => 'Invalid Credentials.',
             ], 400);
         }
 
