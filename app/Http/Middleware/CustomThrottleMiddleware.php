@@ -20,6 +20,13 @@ class CustomThrottleMiddleware
         $user = User::where('email', $request->email)
             ->orWhere('userName', $request->email)->first();
 
+        if (!$user) {
+            return response()->json([
+                "status" => false,
+                "message" => "We couldn't find an account with that email."
+            ], 404);
+        }
+
         $key = "loginAttempts: {$user->id}";
 
         if (RateLimiter::tooManyAttempts(
