@@ -139,9 +139,9 @@ class ApprovalProcessController extends Controller
                     $nextApprover->notify(new ApprovalProcessNotification($nextApprovalProcess, $firstname, $requestForm, $requesterFirstname, $requesterLasttname));
                     event(new NotificationEvent(Auth::user()->id, $nextApprovalProcess->user->id));
 
-                    $user = User::where('id', $requestForm->user_id)->first();
+                   // $user = User::where('id', $requestForm->user_id)->first();
 
-                    $user->notify(new OngoingNotification($requestForm, 'ongoing', $user->firstName, $requestForm->form_type, $request_code));
+                   // $user->notify(new OngoingNotification($requestForm, 'ongoing', $user->firstName, $requestForm->form_type, $request_code));
 
                     // Broadcast the notification count update
                     $message = 'You have a request form to approve';
