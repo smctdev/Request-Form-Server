@@ -423,7 +423,8 @@ class RequestFormController extends Controller
 
             // Decode JSON strings
             $form_data_content = json_decode($request->input('form_data'), true);
-            $noted_by = !empty(json_decode($request->input('noted_by'), true)) ? json_decode($request->input('noted_by'), true) : null;
+            //$noted_by = !empty(json_decode($request->input('noted_by'), true)) ? json_decode($request->input('noted_by'), true) : null;
+            $noted_by = json_decode($request->input('noted_by'), true);
             $approved_by = json_decode($request->input('approved_by'), true);
             $currency = $request->input('currency');
             // Initialize attachment paths
