@@ -11,6 +11,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 
 class NotificationEvent implements ShouldBroadcastNow
@@ -44,6 +45,4 @@ class NotificationEvent implements ShouldBroadcastNow
             new PrivateChannel('pendingCount.' . $this->next_approver_user_id),
         ];
     }
-
-
 }
