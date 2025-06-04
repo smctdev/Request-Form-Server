@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Enums\Status;
+use App\Events\RequestAccessEvent;
 use App\Http\Controllers\Controller;
 use App\Models\RequestAccess;
-use Illuminate\Foundation\Auth\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -24,6 +26,7 @@ class RequestAccessController extends Controller
             ->when($search, fn($query) => $query->where(fn($subQuery) => $subQuery->where('status', "LIKE", "%{$search}%")
                 ->orWhere('request_access_type', "LIKE", "%{$search}%")
                 ->orWhere('request_access_code', "LIKE", "%{$search}%")))
+            ->orderBy("created_at", "desc")
             ->paginate($per_page);
 
         return response()->json($allRequestAccess, 200);
@@ -72,6 +75,11 @@ class RequestAccessController extends Controller
             'status'                    => Status::PENDING,
         ]);
 
+        $admin = User::where('role', 'Admin')
+            ->first();
+
+        RequestAccessEvent::dispatch($admin, $requestAccess->id);
+
         return response()->json([
             'message'       => 'Request Access created successfully',
             'code'          => $requestAccess->request_access_code
@@ -109,12 +117,22 @@ class RequestAccessController extends Controller
             'status'    => $request->status
         ]);
 
-        $user = User::where('id', $requestAccess->user_id)->first();
+        $user = User::with(
+            'branch',
+            'notedBies.notedBy',
+            'approvedBies.approvedBy',
+            'requestAccess',
+        )
+            ->where('id', $requestAccess->user_id)
+            ->first();
 
         if ($requestAccess->status === Status::APPROVED) {
-            $user->role = $requestAccess->request_access_type === 'admin_access' ? 'Admin' : 'approver';
-            $user->save();
+            $user->update([
+                'role'      => $requestAccess->request_access_type === 'admin_access' ? 'Admin' : 'approver'
+            ]);
         }
+
+        RequestAccessEvent::dispatch($user, $requestAccess->id);
 
         return response()->json('Request Access updated successfully', 200);
     }
@@ -136,8 +154,18 @@ class RequestAccessController extends Controller
             return response()->json('Request access has already been approved or declined and cannot be deleted. However, you may submit a new request access.', 403);
         }
 
+        $admin = User::with(
+            'branch',
+            'notedBies.notedBy',
+            'approvedBies.approvedBy',
+            'requestAccess',
+        )
+            ->where('role', 'Admin')
+            ->first();
 
-        // $requestAccess->delete();
+        RequestAccessEvent::dispatch($admin, $requestAccess->id);
+
+        $requestAccess->delete();
 
         return response()->json('Request Access deleted successfully', 204);
     }
