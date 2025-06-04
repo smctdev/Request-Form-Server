@@ -50,7 +50,7 @@ class FeedbackController extends Controller
         }
 
         do {
-            $feedback_code = Str::random(50);
+            $feedback_code = "SMCT-" . Str::random(50);
         } while (Feedback::where("feedback_code", $feedback_code)->first());
 
         $feedback = Feedback::create([
@@ -61,7 +61,7 @@ class FeedbackController extends Controller
             "opinion"           => $request->opinion,
             "other_opinion"     => $request->other_opinion,
             "message"           => $request->message,
-            "feedback_code"     => "SMCT-" . Str::upper($feedback_code)
+            "feedback_code"     => Str::upper($feedback_code)
         ]);
 
         return response()->json([

@@ -11,7 +11,12 @@ class ProfileController extends Controller
 {
     public function profile(Request $request)
     {
-        $myProfile = $request->user()->load('branch', 'notedBies.notedBy', 'approvedBies.approvedBy');
+        $myProfile = $request->user()->load(
+            'branch',
+            'notedBies.notedBy',
+            'approvedBies.approvedBy',
+            'requestAccess',
+        );
 
         return response([
             'status'    =>      true,

@@ -21,6 +21,7 @@ use App\Http\Controllers\API\AttachmentController;
 use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\PositionController;
+use App\Http\Controllers\API\RequestAccessController;
 use App\Http\Controllers\Test\PusherController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -151,4 +152,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/save-approved-noted-by', [ApproverSavedController::class, 'store']);
     Route::get('/view-branch-heads', [BranchHeadController::class, 'getBranchHeads']);
     Route::get('/get-all-branch-heads', [BranchHeadController::class, 'getAllBranchHeads']);
+
+    Route::controller(RequestAccessController::class)->group(function () {
+        Route::get('/employee-request-access', 'index');
+        Route::post('/request-access', 'store');
+        Route::patch('/request-access/{id}/update', 'update');
+        Route::delete('/request-access/{id}/delete', 'destroy');
+    });
 });
