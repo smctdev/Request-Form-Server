@@ -40,9 +40,6 @@ class RequestAccessEvent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         $requestAccessData = RequestAccess::with(
-            'user.branch',
-            'user.notedBies.notedBy',
-            'user.approvedBies.approvedBy',
             'user.requestAccess',
         )
             ->find($this->requestAccessId);
