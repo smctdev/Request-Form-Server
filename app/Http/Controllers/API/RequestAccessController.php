@@ -78,7 +78,7 @@ class RequestAccessController extends Controller
         $admin = User::where('role', 'Admin')
             ->first();
 
-        RequestAccessEvent::dispatch($admin, $requestAccess->id);
+        RequestAccessEvent::dispatch($admin, $requestAccess->id, false);
 
         return response()->json([
             'message'       => 'Request Access created successfully',
@@ -132,7 +132,7 @@ class RequestAccessController extends Controller
             ]);
         }
 
-        RequestAccessEvent::dispatch($user, $requestAccess->id);
+        RequestAccessEvent::dispatch($user, $requestAccess->id, false);
 
         return response()->json('Request Access updated successfully', 200);
     }
@@ -163,7 +163,7 @@ class RequestAccessController extends Controller
             ->where('role', 'Admin')
             ->first();
 
-        RequestAccessEvent::dispatch($admin, $requestAccess->id);
+        RequestAccessEvent::dispatch($admin, $requestAccess->id, true);
 
         $requestAccess->delete();
 

@@ -13,16 +13,16 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class RequestAccessEvent implements ShouldBroadcastNow
+class RequestAccessEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public User $user, public $requestAccessId)
+    public function __construct(public User $user, public $requestAccessId, public bool $delete)
     {
-        $this->requestAccessId = $requestAccessId;
+        //
     }
 
     /**
@@ -47,7 +47,8 @@ class RequestAccessEvent implements ShouldBroadcastNow
         )
             ->find($this->requestAccessId);
         return [
-            'requestAccess'     => $requestAccessData
+            'requestAccess'     => $requestAccessData,
+            'is_delete'         => $this->delete
         ];
     }
 }
