@@ -60,6 +60,9 @@ class LoginController extends Controller
 
         $userRole = Auth::user()->role;
         // Return user data along with the token and expiration time
+
+        $request->session()->regenerate();
+
         return response()->json([
             'status'           => true,
             'message'          => 'Login successful. Redirecting you to Dashboard.',
