@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
@@ -19,8 +20,8 @@ class ProfileController extends Controller
         );
 
         return response([
-            'status'    =>      true,
-            'data'      =>      $myProfile,
+            'status'        => true,
+            'data'          => $myProfile,
         ], 200);
     }
 }
