@@ -26,17 +26,25 @@ class ApproverSavedController extends Controller
         //
     }
 
+    public function reset()
+    {
+        $userId = Auth::id();
+
+        ApprovedBy::where("user_id", $userId)->delete();
+        NotedBy::where('user_id', $userId)->delete();
+
+        return response()->json("Approver selection has been reset.", 201);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $userId = Auth::id();
-        $approvedByIds = $request->approvedByIds;
-        $notedByIds = $request->notedByIds;
 
-        ApprovedBy::where("user_id", $userId)->delete();
-        NotedBy::where('user_id', $userId)->delete();
+        $approvedByIds = $request->approvedByIds ?? [];
+        $notedByIds = $request->notedByIds ?? [];
 
         foreach ($approvedByIds as $index => $id) {
             ApprovedBy::create([

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Notifications\OngoingNotification;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\RequestForm;
@@ -19,6 +18,7 @@ use App\Notifications\PreviousReturnRequestNotification;
 use App\Events\NotificationEvent;
 use App\Models\Branch;
 use App\Notifications\CompletedNotification;
+use Illuminate\Support\Facades\Auth;
 
 class ApprovalProcessController extends Controller
 {
@@ -281,6 +281,176 @@ class ApprovalProcessController extends Controller
         return null;
     }
 
+    public function approvalProcessPending()
+    {
+        $user_id = Auth::id();
+        // try {
+        // Retrieve all approval processes where the current user is involved
+        $approvalProcesses = ApprovalProcess::where('user_id', $user_id)
+            ->orderBy('level')
+            ->with(['requestForm.user', 'user']) // Eager load request form with user
+            ->get();
+
+        // Process each approval process
+        $transformedApprovalProcesses = $approvalProcesses->map(function ($approvalProcess) use ($user_id) {
+
+            $requestForm = $approvalProcess->requestForm;
+            $requester = $requestForm?->user; // Eager loaded user
+
+            // Check if all previous levels are approved
+            $previousLevelsApproved = $requestForm?->approvalProcess
+                ->where('level', '<', $approvalProcess->level)
+                ->every(function ($process) {
+                    return $process->status == 'Approved';
+                });
+
+            // Determine if it's the user's turn to approve
+            $isUserTurn = $previousLevelsApproved && $approvalProcess->status == 'Pending' && $approvalProcess->user_id == $user_id;
+
+            // Include request forms where the previous level has statuses of Approved, Disapproved, or Rejected by...
+            $isRelevantStatus = in_array($approvalProcess->status, ['Approved', 'Completed', 'Disapproved']) ||
+                preg_match('/^Rejected by/', $approvalProcess->status);
+
+            if (!$isRelevantStatus && !$isUserTurn) {
+                return null; // Skip if the status is not relevant and it's not the user's turn to approve
+            }
+
+            // Determine if the current user is the last approver
+            $isLastApprover = $requestForm?->approvalProcess()
+                ->where('status', 'Pending')
+                ->where('level', '>', $approvalProcess->level)
+                ->count() === 0;
+
+            // Determine if the request form has been disapproved
+            $isDisapproved = $requestForm?->approvalProcess()
+                ->where('status', 'Disapproved')
+                ->count() > 0;
+
+            // Determine the next approver
+            $pendingApproverr = $requestForm?->approvalProcess()
+                ->where('status', 'Pending')
+                ->orderBy('level')
+                ->first()?->user; // Get the next approver
+
+            // Fetch approvers details
+            $notedByIds = $requestForm->noted_by ?? [];
+            $approvedByIds = $requestForm->approved_by ?? [];
+
+            // Combine all approvers and other involved user IDs
+            $allUserIds = $requestForm?->approvalProcess
+                ->pluck('user_id')
+                ->merge($notedByIds)
+                ->merge($approvedByIds)
+                ->unique()
+                ->values();
+
+            $allApprovers = User::whereIn('id', $allUserIds)
+                ->select('id', 'firstName', 'lastName', 'position', 'signature', 'branch')
+                ->get()
+                ->keyBy('id');
+            $approvalData = ApprovalProcess::whereIn('user_id', $allUserIds)
+                ->where('request_form_id', $requestForm->id)
+                ->get()
+                ->keyBy('user_id');
+
+            $attachments = $approvalData->pluck('attachment')->filter()->values()->all();
+
+            // Helper function to format approver data with status and comment
+
+            $formatApproverData = function ($userId) use ($allApprovers, $approvalData) {
+                if (isset($allApprovers[$userId])) {
+                    $user = $allApprovers[$userId];
+                    $approval = $approvalData[$userId] ?? null;
+
+                    return [
+                        'id' => $user->id,
+                        'firstName' => $user->firstName,
+                        'lastName' => $user->lastName,
+                        'status' => $approval->status ?? '',
+                        'comment' => $approval->comment ?? '',
+                        'position' => $user->position,
+                        'signature' => $user->signature
+                    ];
+                }
+                return null;
+            };
+            // Format noted_by users
+            $formattedNotedBy = collect($notedByIds)
+                ->map($formatApproverData)
+                ->filter()
+                ->values()
+                ->all();
+
+            // Format approved_by users
+            $formattedApprovedBy = collect($approvedByIds)
+                ->map($formatApproverData)
+                ->filter()
+                ->values()
+                ->all();
+
+            // Format other approvers who are not listed in noted_by or approved_by
+            $otherUserIds = $allUserIds?->diff($notedByIds)->diff($approvedByIds);
+            $formattedOtherApprovers = collect($otherUserIds)
+                ->map($formatApproverData)
+                ->filter()
+                ->values()
+                ->all();
+
+            // Prepare the response format
+            $approver = $approvalProcess->user; // Eager loaded approver
+            $branch = $requestForm?->branch_code;
+            $branchNa = Branch::find($branch);
+            $acronym = $branchNa?->acronym;
+            $branchName = $branchNa?->branch_code;
+            // Determine pending approver
+            $pendingApprover = null;
+            if ($isUserTurn && $isLastApprover) {
+                $pendingApprover = "{$approver->firstName} {$approver->lastName}";
+            } elseif ($isDisapproved) {
+                $pendingApprover = 'No Pending Approver';
+            } else {
+                $pendingApprover = $pendingApproverr ? "{$pendingApproverr->firstName} {$pendingApproverr->lastName}" : 'No Pending Approver';
+            }
+
+            return [
+                'id' => $requestForm?->id,
+                'form_type' => $requestForm?->form_type,
+                'form_data' => $requestForm?->form_data, // Assuming form_data is JSON
+                'status' => $approvalProcess->status, // Include the actual status of the approval process
+                'completed_status' => $requestForm?->status, // Include the actual status of the approval process
+                'created_at' => $approvalProcess->created_at,
+                'currency' => $requestForm?->currency,
+                'updated_at' => $approvalProcess->updated_at,
+                'user_id' => $requestForm?->user_id,
+                'requested_by' => ($requester ? "{$requester->firstName} {$requester->lastName}" : "Unknown"),
+                'requested_signature' => ($requester ? "{$requester->signature}" : "Unknown"), // Handle null requester
+                'requested_position' => ($requester ? "{$requester->position}" : "Unknown"), // Handle null requester
+                'noted_by' => $formattedNotedBy,
+                'approved_by' => $formattedApprovedBy,
+                'avp_staff' => $formattedOtherApprovers, // Include other approvers not listed in noted_by or approved_by
+                'pending_approver' => $pendingApprover, // Update pending approver logic
+                'attachment' => $requestForm?->attachment,
+                'branch' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branchNa?->branch_name . 'ㅤ'),
+                'request_code' => "$branchName-$requestForm?->request_code",
+                'approved_attachment' => $attachments,
+                'completed_code' => $requestForm?->completed_code
+            ];
+        })->filter()->values(); // Filter out null values
+
+        // } catch (\Exception $e) {
+        //     // Log the exception for debugging purposes
+        //     Log::error('Error in getRequestFormsForApproval', ['error' => $e->getMessage()]);
+
+        //     return response()->json([
+        //         'message' => 'An error occurred',
+        //         'error' => 'An error occurred while processing your request.',
+        //     ], 500);
+        // }
+        $counts = $transformedApprovalProcesses->count();
+
+        return response()->json($counts, 200);
+    }
+
     public function getRequestFormsForApproval($user_id)
     {
         // try {
@@ -434,12 +604,13 @@ class ApprovalProcessController extends Controller
                 'approved_attachment' => $attachments,
                 'completed_code' => $requestForm?->completed_code
             ];
-        })->filter(); // Filter out null values
+        })->filter()->values(); // Filter out null values
 
 
         return response()->json([
             'message' => 'Approval processes you are involved in',
-            'request_forms' => $transformedApprovalProcesses->values(), // Ensure it's a zero-indexed array
+            'request_forms'         => $transformedApprovalProcesses, // Ensure it's a zero-indexed array
+            'request_pending_count' => $transformedApprovalProcesses->count()
         ], 200);
 
         // } catch (\Exception $e) {
