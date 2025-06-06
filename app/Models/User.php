@@ -75,6 +75,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(ApprovalProcess::class);
     }
+
+    public function approvalProcessPending()
+    {
+        return $this->hasMany(ApprovalProcess::class)
+            ->where('status', 'Pending');
+    }
+
     public function hasRole($role)
     {
         return $this->role === $role;

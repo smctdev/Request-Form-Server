@@ -48,8 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post("create-request", [RequestFormController::class, "createRequest"])->name('create.request');
     Route::get("view-user/{id}", [UserController::class, "viewUser"])->name('view.user');
     Route::get('/profile', [ProfileController::class, 'profile']);
-    Route::get('request-forms/for-approval/{user_id}', [ApprovalProcessController::class, 'getRequestFormsForApproval'])->name('get.request.form.for.approval');
-
+    Route::get('request-forms/for-approval/{user_id}/for-approval-requests', [ApprovalProcessController::class, 'getRequestFormsForApproval'])->name('get.request.form.for.approval');
+    Route::get('/for-approval-pendings-count', [ApprovalProcessController::class, 'approvalProcessPending']);
     Route::post("update-request/{id}", [RequestFormController::class, "updateRequest"])->name('update.request');
     Route::put('change-password/{id}', [ChangePasswordController::class, 'changePassword'])->name('change.password');
 
@@ -65,7 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete("delete-approver/{id}", [ApproverController::class, "deleteApprover"])->name('delete-approver');
     Route::middleware('auth')->get('/view-request', [RequestFormController::class, 'index']);
     Route::middleware('auth')->get('/view-requests', [RequestFormController::class, 'viewAllRequests']);
-    Route::get("total-request-sent/{user_id}", [RequestFormController::class, "totalRequestSent"])->name('total.request.sent.by.user');
+    Route::get("total-request-sent/{user_id}/my-request-total", [RequestFormController::class, "totalRequestSent"])->name('total.request.sent.by.user');
     Route::delete("delete-request/{id}", [RequestFormController::class, "deleteRequest"])->name('delete.request');
 
     // APPROVERS
@@ -124,13 +124,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post("attachments/upload/{requestFormId}", [RequestFormController::class, "uploadAttachments"])->name('upload.attachments');
 
     // NOTIFICATION
-    Route::get('notifications/{id}/all', [NotificationController::class, 'getAllNotifications'])->name('get.all.notification');
-    Route::get('notifications/{id}', [NotificationController::class, 'getNotifications'])->name('get.notification');
+    Route::get('notifications/{id}/notifications', [NotificationController::class, 'getAllNotifications'])->name('get.all.notification');
+    Route::get('notifications/{id}/notifications', [NotificationController::class, 'getNotifications'])->name('get.notification');
     Route::get('notifications/{id}/unread', [NotificationController::class, 'getUnreadNotifications'])->name('get.unread.notification');
     Route::put('notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('get.mark.as.read.notification');
     Route::get('notifications/{id}/count-unread-notification', [NotificationController::class, 'countUnreadNotifications'])->name('count.unread.notification');
-    Route::put('notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead'])->name('get.mark.all.as.read.notification');
-    Route::post('/read-notification/{id}', [NotificationController::class, 'markAsReadNotification']);
+    Route::put('notifications/mark-all-as-read/{userId}/notification-read-all', [NotificationController::class, 'markAllAsRead'])->name('get.mark.all.as.read.notification');
+    Route::post('/read-notification/{id}/notification-read', [NotificationController::class, 'markAsReadNotification']);
 
     // POSITION
 
@@ -150,6 +150,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/save-approved-noted-by', [ApproverSavedController::class, 'store']);
+    Route::post('/reset-approved-noted-by', [ApproverSavedController::class, 'reset']);
     Route::get('/view-branch-heads', [BranchHeadController::class, 'getBranchHeads']);
     Route::get('/get-all-branch-heads', [BranchHeadController::class, 'getAllBranchHeads']);
 
