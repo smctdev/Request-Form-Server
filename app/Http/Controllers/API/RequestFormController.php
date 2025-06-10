@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Branch;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class RequestFormController extends Controller
 {
@@ -363,7 +366,7 @@ class RequestFormController extends Controller
             DB::commit();
             return response()->json([
                 'message' => 'Request form created successfully',
-            ], 200);
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Request form creation failed', ['error' => $e->getMessage()]);
@@ -526,16 +529,16 @@ class RequestFormController extends Controller
                 $level++;
             }
 
-             // Build approvers list properly
-                $approvers = [];
+            // Build approvers list properly
+            $approvers = [];
 
-                if (!empty($noted_by)) {
-                    $approvers[] = ['type' => 'noted_by', 'ids' => $noted_by];
-                }
-                
-                if (!empty($approved_by)) {
-                    $approvers[] = ['type' => 'approved_by', 'ids' => $approved_by];
-                }
+            if (!empty($noted_by)) {
+                $approvers[] = ['type' => 'noted_by', 'ids' => $noted_by];
+            }
+
+            if (!empty($approved_by)) {
+                $approvers[] = ['type' => 'approved_by', 'ids' => $approved_by];
+            }
 
             foreach ($approvers as $approverGroup) {
                 foreach ($approverGroup['ids'] as $approverId) {
@@ -660,16 +663,46 @@ class RequestFormController extends Controller
 
     //VIEW REQUEST FORM CREATED BY SPECIFIC USER
 
+
     public function index()
     {
+        $perPage = request("per_page") ?: 10;
+        $search = request("search") ?: "";
+        function paginateCollection($items, $perPage, $currentPage = null, $options = [])
+        {
+            $currentPage = $currentPage ?: LengthAwarePaginator::resolveCurrentPage();
+            $items = $items instanceof Collection ? $items : Collection::make($items);
+            $pagedItems = $items->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+            return new LengthAwarePaginator(
+                $pagedItems,
+                $items->count(),
+                $perPage,
+                $currentPage,
+                $options
+            );
+        }
         try {
             $currentUserId = Auth::user()->id;
             $current_branch = Auth::user()->branch_code;
 
+            $dateSearch = "";
+
+            if (Carbon::hasFormat($search, 'F j, Y')) {
+
+                $dateSearch = Carbon::parse($search)->format("Y-m-d");
+            }
 
             // Fetch request forms where user_id matches the current user's ID
             $requestForms = RequestForm::with('user.branch')
                 ->where('user_id', $currentUserId)
+                ->when($search, fn ($query) =>
+                    $query->where(fn ($q) =>
+                        $q->where('form_type', 'LIKE', "%{$search}%")
+                            ->orWhere('request_code', 'LIKE', "%{$search}%")
+                            ->orWhereDate('created_at', $dateSearch)
+                    )
+                )
                 ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code')
                 ->with('approvalProcess')
                 ->get();
@@ -791,7 +824,7 @@ class RequestFormController extends Controller
 
             return response()->json([
                 'message' => 'Request forms retrieved successfully',
-                'data' => $response
+                'data' => paginateCollection($response, $perPage)
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

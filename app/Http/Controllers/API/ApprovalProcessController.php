@@ -18,6 +18,9 @@ use App\Notifications\PreviousReturnRequestNotification;
 use App\Events\NotificationEvent;
 use App\Models\Branch;
 use App\Notifications\CompletedNotification;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ApprovalProcessController extends Controller
@@ -453,10 +456,40 @@ class ApprovalProcessController extends Controller
 
     public function getRequestFormsForApproval($user_id)
     {
+
+        $perPage = request("per_page") ?: 10;
+        $search = request("search") ?: "";
+        function paginateCollection($items, $perPage, $currentPage = null, $options = [])
+        {
+            $currentPage = $currentPage ?: LengthAwarePaginator::resolveCurrentPage();
+            $items = $items instanceof Collection ? $items : Collection::make($items);
+            $pagedItems = $items->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+            return new LengthAwarePaginator(
+                $pagedItems,
+                $items->count(),
+                $perPage,
+                $currentPage,
+                $options
+            );
+        }
+        $dateSearch = "";
+
+        if (Carbon::hasFormat($search, 'F j, Y')) {
+
+            $dateSearch = Carbon::parse($search)->format("Y-m-d");
+        }
+
         // try {
         // Retrieve all approval processes where the current user is involved
         $approvalProcesses = ApprovalProcess::where('user_id', $user_id)
             ->orderBy('level')
+            ->when($search, fn($query) =>
+                $query->where(fn($subQuery) =>
+                    $subQuery->whereHas('requestForm', fn($triQuery) =>
+                        $triQuery->where('form_type', 'LIKE', "%{$search}%")
+                            ->orWhere('request_code', 'LIKE', "%{$search}%")
+                            ->orWhereDate("created_at", $dateSearch))))
             ->with(['requestForm.user', 'user']) // Eager load request form with user
             ->get();
 
@@ -608,9 +641,10 @@ class ApprovalProcessController extends Controller
 
 
         return response()->json([
-            'message' => 'Approval processes you are involved in',
-            'request_forms'         => $transformedApprovalProcesses, // Ensure it's a zero-indexed array
-            'request_pending_count' => $transformedApprovalProcesses->count()
+            'message'                         => 'Approval processes you are involved in',
+            'request_forms_paginated'         => paginateCollection($transformedApprovalProcesses, $perPage), // Ensure it's a zero-indexed array
+            'request_forms'                   => $transformedApprovalProcesses, // Ensure it's a zero-indexed array
+            'request_pending_count'           => $transformedApprovalProcesses->count()
         ], 200);
 
         // } catch (\Exception $e) {
