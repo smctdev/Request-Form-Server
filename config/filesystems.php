@@ -57,8 +57,19 @@ return [
         ],
         'd_drive' => [
             'driver' => 'local',
-            'root' => '\\\\122.52.134.146\\requestUploads',  // Path to your D: drive folder
+            //'root' => '\\\\122.52.134.146\\requestUploads',  // Path to your D: drive folder
+            'root' =>'/mnt/nvme0n1/requestUploads',
             'visibility' => 'private',  // Optional: use 'private' if needed
+            'permissions' => [
+                'file' => [
+                    'public' => 0755,
+                    'private' => 0700,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0700,
+                ],
+            ],
         ],
 
     ],

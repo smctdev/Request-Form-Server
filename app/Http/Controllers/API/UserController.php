@@ -441,7 +441,7 @@ class UserController extends Controller
             }
 
             $file = $request->file('profile_picture');
-            $path = $file->store('request_form_profile_pictures', 'public');
+            $path = $file->store('request_form_profile_pictures', 'd_drive');
             $user->profile_picture = $path;
         }
 
