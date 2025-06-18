@@ -290,6 +290,7 @@ class ApprovalProcessController extends Controller
         // try {
         // Retrieve all approval processes where the current user is involved
         $approvalProcesses = ApprovalProcess::where('user_id', $user_id)
+            ->where('status', 'Pending')
             ->orderBy('level')
             ->with(['requestForm.user', 'user']) // Eager load request form with user
             ->get();
@@ -434,7 +435,7 @@ class ApprovalProcessController extends Controller
                 'pending_approver' => $pendingApprover, // Update pending approver logic
                 'attachment' => $requestForm?->attachment,
                 'branch' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branchNa?->branch_name . 'ㅤ'),
-                'request_code' => "$branchName-$requestForm?->request_code",
+                'request_code' => "{$branchName}-{$requestForm?->request_code}",
                 'approved_attachment' => $attachments,
                 'completed_code' => $requestForm?->completed_code
             ];
@@ -485,11 +486,11 @@ class ApprovalProcessController extends Controller
         $approvalProcesses = ApprovalProcess::where('user_id', $user_id)
             ->orderBy('level')
             ->when($search, fn($query) =>
-                $query->where(fn($subQuery) =>
-                    $subQuery->whereHas('requestForm', fn($triQuery) =>
-                        $triQuery->where('form_type', 'LIKE', "%{$search}%")
-                            ->orWhere('request_code', 'LIKE', "%{$search}%")
-                            ->orWhereDate("created_at", $dateSearch))))
+            $query->where(fn($subQuery) =>
+            $subQuery->whereHas('requestForm', fn($triQuery) =>
+            $triQuery->where('form_type', 'LIKE', "%{$search}%")
+                ->orWhere('request_code', 'LIKE', "%{$search}%")
+                ->orWhereDate("created_at", $dateSearch))))
             ->with(['requestForm.user', 'user']) // Eager load request form with user
             ->get();
 
