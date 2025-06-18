@@ -435,8 +435,8 @@ class UserController extends Controller
         // change all public into d_drive if using d_drive trunas
         if ($request->hasFile('profile_picture')) {
             if ($user->profile_picture !== null) {
-                if (Storage::disk('public')->exists($user->profile_picture)) {
-                    Storage::disk('public')->delete($user->profile_picture);
+                if (Storage::disk('d-drive')->exists($user->profile_picture)) {
+                    Storage::disk('d_drive')->delete($user->profile_picture);
                 }
             }
 

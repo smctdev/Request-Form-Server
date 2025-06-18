@@ -454,8 +454,8 @@ class RequestFormController extends Controller
             $removed_attachments = $request->input('removed_attachments', []);
             foreach ($removed_attachments as $path) {
                 // Delete the file from storage
-                if (Storage::disk('public')->exists('request_form_attachments/' . $path)) {
-                    Storage::disk('public')->delete('request_form_attachments/' . $path);
+                if (Storage::disk('d_drive')->exists('request_form_attachments/' . $path)) {
+                    Storage::disk('d_drive')->delete('request_form_attachments/' . $path);
                 }
                 // Remove from the attachment list as well
                 $attachment_paths = array_filter($attachment_paths, function ($existing_path) use ($path) {
