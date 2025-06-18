@@ -696,8 +696,11 @@ class RequestFormController extends Controller
             // Fetch request forms where user_id matches the current user's ID
             $requestForms = RequestForm::with('user.branch')
                 ->where('user_id', $currentUserId)
-                ->when($search, fn ($query) =>
-                    $query->where(fn ($q) =>
+                ->when(
+                    $search,
+                    fn($query) =>
+                    $query->where(
+                        fn($q) =>
                         $q->where('form_type', 'LIKE', "%{$search}%")
                             ->orWhere('request_code', 'LIKE', "%{$search}%")
                             ->orWhereDate('created_at', $dateSearch)
@@ -730,6 +733,8 @@ class RequestFormController extends Controller
                     ->where('request_form_id', $requestForm->id)
                     ->get()
                     ->keyBy('user_id');
+
+                $attachments = $approvalData->pluck('attachment')->filter()->values()->all();
 
                 // Format noted_by users
                 $formattedNotedBy = $notedByIds
@@ -818,7 +823,8 @@ class RequestFormController extends Controller
                     'pending_approver' => $approverName,
                     'request_code' => "$branchName-$requestForm->request_code",
                     'completed_code' => $requestForm->completed_code,
-                    'user'  => $requestForm->user
+                    'user'  => $requestForm->user,
+                    'approved_attachments' => $attachments
                 ];
             });
 
