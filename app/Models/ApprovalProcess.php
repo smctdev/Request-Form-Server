@@ -17,7 +17,7 @@ class ApprovalProcess extends Model
         'status',
         'comment',
         'attachment',
-        
+
     ];
 
     protected $attributes = [
@@ -42,9 +42,8 @@ class ApprovalProcess extends Model
     public function previousApprovalProcess()
     {
         return $this->hasOne(ApprovalProcess::class, 'request_form_id', 'request_form_id')
-                    ->where('level', '<', $this->level)
-                    ->where('status', '!=', 'approved')
-                    ->orderBy('level', 'desc');
+            ->where('level', '<', $this->level)
+            ->where('status', '!=', 'approved')
+            ->orderBy('level', 'desc');
     }
-    
 }
