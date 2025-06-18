@@ -634,7 +634,7 @@ class ApprovalProcessController extends Controller
                 'pending_approver' => $pendingApprover, // Update pending approver logic
                 'attachment' => $requestForm?->attachment,
                 'branch' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branchNa?->branch_name . 'ㅤ'),
-                'request_code' => "$branchName-$requestForm?->request_code",
+                'request_code' => "{$branchName}-{$requestForm?->request_code}",
                 'approved_attachment' => $attachments,
                 'completed_code' => $requestForm?->completed_code
             ];
