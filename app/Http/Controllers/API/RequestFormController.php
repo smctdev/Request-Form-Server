@@ -577,7 +577,7 @@ class RequestFormController extends Controller
                     $date = now();
                     $type = 'App\Notifications\ApprovalProcessNotification';
                     $read_at = null;
-                    event(new NotificationEvent(Auth::user()->id, $firstApprovalProcess->user->id));
+                    // event(new NotificationEvent(Auth::user()->id, $firstApprovalProcess->user->id));
                 }
             }
 
