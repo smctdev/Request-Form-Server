@@ -175,6 +175,20 @@ class RequestFormController extends Controller
                     'total_spotcash' => 'required|numeric',
                     'total_discount' => 'required|numeric',
                 ],
+                  'Check Issuance Requisition Slip' => [
+                    'payee' => 'required',
+                    'bank' => 'required',
+                    'account_no' => 'required',
+                    'swift_code' => 'required',
+
+                    "items" => [
+                        'quantity' => 'required|numeric',
+                        'description' => 'required',
+                        'unit_cost' => 'required|numeric',
+                        'total_amount' => 'required|numeric',
+                        'usage' => 'required',
+                    ]
+                ],
             ];
 
             if (!isset($validationRules[$formType])) {
@@ -366,6 +380,7 @@ class RequestFormController extends Controller
             DB::commit();
             return response()->json([
                 'message' => 'Request form created successfully',
+                'data' => $requestFormData
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -387,6 +402,7 @@ class RequestFormController extends Controller
             'Refund Request' => 'RR',
             'Stock Requisition Slip' => 'SRL',
             'Discount Requisition Form' => 'DRF',
+            'Check Issuance Requisition Slip' => 'CIRS',
         ];
 
         if (isset($prefixes[$formType]) && $branchId) {
@@ -708,6 +724,7 @@ class RequestFormController extends Controller
                 )
                 ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code')
                 ->with('approvalProcess')
+                ->latest('created_at')
                 ->get();
 
 
