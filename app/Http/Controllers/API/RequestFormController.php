@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bank;
 use App\Models\CustomApprovers;
 use App\Models\ApprovalProcess;
 use Illuminate\Http\Request;
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Branch;
+use App\Models\Department;
+use App\Models\Supplier;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -32,6 +35,8 @@ class RequestFormController extends Controller
     //CREATE REQUEST
     public function createRequest(Request $request)
     {
+        $formDataDecoded = json_decode($request->form_data);
+
         try {
             // Validate request data
             $validated = $request->validate([
@@ -175,7 +180,7 @@ class RequestFormController extends Controller
                     'total_spotcash' => 'required|numeric',
                     'total_discount' => 'required|numeric',
                 ],
-                  'Check Issuance Requisition Slip' => [
+                'Check Issuance Requisition Slip' => [
                     'payee' => 'required',
                     'bank' => 'required',
                     'account_no' => 'required',
@@ -200,6 +205,20 @@ class RequestFormController extends Controller
             // Begin transaction
             DB::beginTransaction();
 
+            if ($request->form_type === 'Purchase Order Requisition Slip') {
+                Supplier::updateOrCreate([
+                    'name'      => $formDataDecoded[0]->supplier
+                ], [
+                    'address'   => $formDataDecoded[0]->address,
+                ]);
+            }
+
+            if ($request->form_type === 'Check Issuance Requisition Slip') {
+                Bank::firstOrCreate([
+                    'name' => $formDataDecoded[0]->bank
+                ]);
+            }
+
             // Validate form data against rules
             $encodedFormData = [];
             foreach ($formDataArray as $key => $formData) {
@@ -222,6 +241,7 @@ class RequestFormController extends Controller
 
                 $encodedFormData['items'] = $items;
             }
+
 
             // Handle file uploads
             $filePaths = [];

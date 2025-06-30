@@ -18,10 +18,12 @@ use App\Http\Controllers\API\ApproverController;
 use App\Http\Controllers\API\AreaManagerController;
 use App\Http\Controllers\API\ApprovalProcessController;
 use App\Http\Controllers\API\AttachmentController;
+use App\Http\Controllers\API\BankController;
 use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\API\RequestAccessController;
+use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\Test\PusherController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -41,6 +43,9 @@ Route::controller(FeedbackController::class)->group(function () {
     Route::get('/feedbacks', 'index');
     Route::post('/send-feedback', 'store');
 });
+
+Route::get('/suppliers', [SupplierController::class, 'index']);
+Route::get('/banks', [BankController::class, 'index']);
 
 // PROTECTED
 // REQUEST FORM
