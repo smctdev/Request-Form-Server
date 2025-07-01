@@ -80,6 +80,7 @@ class RequestFormController extends Controller
                 'Application For Cash Advance' => [
                     "date" => 'required|date',
                     "department" => 'required',
+                    "reason" => 'required',
                     "amount" => 'required|numeric',
                     "liquidation_date" => 'required|date',
                     "usage" => 'required',
@@ -250,7 +251,7 @@ class RequestFormController extends Controller
 
                 foreach ($files as $file) {
                     // change to d_drive if using trunas
-                    $filePath = $file->store('request_form_attachments', 'public');
+                    $filePath = $file->store('request_form_attachments', 'd_drive');
                     if (!$filePath) {
                         DB::rollBack();
                         return response()->json([
@@ -474,7 +475,7 @@ class RequestFormController extends Controller
 
             if ($request->hasFile('new_attachments')) {
                 foreach ($request->file('new_attachments') as $file) {
-                    $attachment_paths[] = $file->store('request_form_attachments', 'public'); // Add new file paths
+                    $attachment_paths[] = $file->store('request_form_attachments', 'd_drive'); // Add new file paths
                 }
             }
 
@@ -490,8 +491,8 @@ class RequestFormController extends Controller
             $removed_attachments = $request->input('removed_attachments', []);
             foreach ($removed_attachments as $path) {
                 // Delete the file from storage
-                if (Storage::disk('public')->exists('request_form_attachments/' . $path)) {
-                    Storage::disk('public')->delete('request_form_attachments/' . $path);
+                if (Storage::disk('d_drive')->exists('request_form_attachments/' . $path)) {
+                    Storage::disk('d_drive')->delete('request_form_attachments/' . $path);
                 }
                 // Remove from the attachment list as well
                 $attachment_paths = array_filter($attachment_paths, function ($existing_path) use ($path) {
@@ -643,7 +644,7 @@ class RequestFormController extends Controller
 
         if ($request->hasFile('attachment')) {
             foreach ($request->file('attachment') as $file) {
-                $filePath = $file->store('request_form_attachments', 'public');
+                $filePath = $file->store('request_form_attachments', 'd_drive');
                 $fileName = $file->getClientOriginalName();
 
                 if (!$filePath) {
