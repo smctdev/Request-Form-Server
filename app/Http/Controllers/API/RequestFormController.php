@@ -80,6 +80,7 @@ class RequestFormController extends Controller
                 'Application For Cash Advance' => [
                     "date" => 'required|date',
                     "department" => 'required',
+                    "reason" => 'required',
                     "amount" => 'required|numeric',
                     "liquidation_date" => 'required|date',
                     "usage" => 'required',
