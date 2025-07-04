@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Position;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -24,7 +25,7 @@ class RegisterController extends Controller
                 "userName" => 'required|string|max:255',
                 "email" => "required|email|unique:users,email",
                 "password" => "required|min:5",
-                "position" => 'required|string|max:255|in:'.implode(',', $positionData?->pluck('value')->toArray()),
+                "position" => 'required|string|max:255|in:' . implode(',', $positionData?->pluck('value')->toArray()),
                 "signature" => "sometimes",
                 "branch" => "required|string|max:255",
                 "employee_id" => "required|string|max:255|unique:users,employee_id",
@@ -37,7 +38,7 @@ class RegisterController extends Controller
                 ]);
             }
 
-        /*     // Decode and save the signature
+            /*     // Decode and save the signature
             $signature = $request->input('signature');
             $signature = str_replace('data:image/png;base64,', '', $signature);
             $signature = str_replace(' ', '+', $signature);
@@ -49,7 +50,14 @@ class RegisterController extends Controller
             if (!file_put_contents($filePath, $signatureData)) {
                 return response()->json(['error' => 'Unable to save the signature file'], 500);
             } */
-            $signature = $request->input('signature');
+            $signature = $request->signature;
+            $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
+
+            $user = $request->user();
+
+            if (Storage::disk('public')->exists($signature)) {
+                Storage::disk('public')->delete($signature);
+            }
             $user = User::create([
                 "firstName" => $request->firstName,
                 "lastName" => $request->lastName,
@@ -59,10 +67,10 @@ class RegisterController extends Controller
                 "email" => $request->email,
                 "password" => bcrypt($request->password),
                 "position" => $request->position,
-                'signature' => $signature,
-                'role'=> 'User',
-                'branch'=> $request->branch,
-                'employee_id'=> $request->employee_id,
+                'signature' => $path,
+                'role' => 'User',
+                'branch' => $request->branch,
+                'employee_id' => $request->employee_id,
             ]);
 
             return response()->json([

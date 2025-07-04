@@ -17,4 +17,9 @@ class Branch extends Model
     {
         return $this->hasMany(AVPFinanceStaff::class, 'branch_id');
     }
+
+    public function requests()
+    {
+        return $this->hasMany(RequestForm::class);
+    }
 }

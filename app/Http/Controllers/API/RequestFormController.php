@@ -990,7 +990,85 @@ class RequestFormController extends Controller
     //VIEW RECENT REQUESTS
 
 
+    public function requestReports()
+    {
 
+        $per_page = request('per_page', 10);
+        $search = request('search', '');
+        $filter = request('filter', 'Pending');
 
+        $requestReports = RequestForm::with('user', 'branchCode')
+            ->when(
+                $search,
+                fn($query)
+                =>
+                $query->where(
+                    fn($subQuery)
+                    =>
+                    $subQuery->where('form_type', 'LIKE', "%{$search}%")
+                        ->orWhere('status', 'LIKE', "%{$search}%")
+                        ->orWhere('request_code', 'LIKE', "%{$search}%")
+                        ->orWhere('completed_code', 'LIKE', "%{$search}%")
+                        ->orWhereHas(
+                            'branchCode',
+                            fn($branch)
+                            =>
+                            $branch->where('branch_code', 'LIKE', "%{$search}%")
+                                ->orWhere('branch_name', 'LIKE', "%{$search}%")
+                                ->orWhere('branch', 'LIKE', "%{$search}%")
+                                ->orWhere('acronym', 'LIKE', "%{$search}%")
+                        )
+                )
+            )
+            ->when(
+                $filter,
+                fn($query)
+                =>
+                $query->where('status', $filter)
+            )
+            ->latest()
+            ->paginate($per_page)
+            ->map(fn($requestReport) => [
+                'id'                => $requestReport->id,
+                'user_id'           => $requestReport->user_id,
+                'form_type'         => $requestReport->form_type,
+                'form_data'         => $requestReport->form_data,
+                'created_at'        => $requestReport->created_at,
+                'updated_at'        => $requestReport->updated_at,
+                'user'              => $requestReport->user,
+                'currency'          => $requestReport->currency,
+                'status'            => $requestReport->status,
+                'attachment'        => $requestReport->attachment,
+                'branch_code'       => $requestReport->branchCode,
+                'request_code'      => $requestReport->request_code,
+                'completed_code'    => $requestReport->completed_code,
+                'approved_bies'     => User::whereIn('id', $requestReport->approved_by)
+                    ->get([
+                        'firstName',
+                        'lastName',
+                        'id',
+                        'branch_code',
+                        'position',
+                        'signature',
+                        'profile_picture',
+                        'employee_id'
+                    ]),
+                'noted_bies'        => User::whereIn('id', $requestReport->noted_by)
+                    ->get([
+                        'firstName',
+                        'lastName',
+                        'id',
+                        'branch_code',
+                        'position',
+                        'signature',
+                        'profile_picture',
+                        'employee_id'
+                    ])
+            ]);
 
+        return response()->json([
+            'message'   => 'Request reports retrieved successfully',
+            'data'      => $requestReports
+        ], 200);
+    }
 }

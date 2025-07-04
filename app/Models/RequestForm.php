@@ -68,8 +68,10 @@ class RequestForm extends Model
     }
     public function attachments()
     {
-
         return $this->hasMany(Attachment::class);
-
+    }
+    public function branchCode()
+    {
+        return $this->belongsTo(Branch::class, 'branch_code');
     }
 }

@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ResetPasswordMail;
+use App\Models\Branch;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -307,15 +308,18 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         // Get the base64 string from the request
-        $base64Signature = $request->input('signature');
+        $signature = $request->signature;
 
-        // Ensure it starts with "data:image/png;base64,"
-        if (strpos($base64Signature, 'data:image/png;base64,') !== 0) {
-            return response()->json(['error' => 'Invalid signature format.'], 400);
+        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
+
+        $user = $request->user();
+
+        if (Storage::disk('public')->exists($signature)) {
+            Storage::disk('public')->delete($signature);
         }
 
-        // Save the signature directly to the user's profile
-        $user->signature = $base64Signature;
+        $user->signature = $path;
+
         $user->save();
 
         return response()->json(['message' => 'Signature updated successfully.'], 200);
@@ -412,7 +416,7 @@ class UserController extends Controller
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
-            $path = $file->store('request_form_profile_pictures', 'd_drive');
+            $path = $file->store('request_form_profile_pictures', 'public');
             $user->profile_picture = $path;
         }
 
@@ -571,6 +575,78 @@ class UserController extends Controller
 
         return response()->json([
             'message'       =>          'User ' . $user->firstName . ' verified successfully.',
+        ], 200);
+    }
+
+    public function uploadBulkUser(Request $request)
+    {
+        $files = $request->data;
+        $users = [];
+
+        foreach ($files as $file) {
+
+            $branch = Branch::where('branch_code', $file[3])
+                ->first();
+
+            $exists = User::where('employee_id', $file[6])
+                ->where('email', $file[7])
+                ->where('username', $file[5])
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
+            $users[] = [
+                'firstName'         => $file[0],
+                'lastName'          => $file[1],
+                'contact'           => $file[2],
+                'branch_code'       => !$branch ? null : $branch->id,
+                'branch'            => !$branch ? null : $branch->branch,
+                'username'          => $file[5],
+                'employee_id'       => $file[6],
+                'email'             => $file[7],
+                'position'          => $file[8],
+                'role'              => 'User',
+                'email_verified_at' => now(),
+                'password'          => Hash::make('temp_password'),
+                'signature'         => null,
+                'profile_picture'   => null,
+                'remember_token'    => null,
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ];
+        }
+
+        if (!empty($users)) {
+            User::insert($users);
+        }
+
+        $count = count($users);
+
+        return response()->json([
+            'message' => "{$count} users uploaded successfully",
+        ], 201);
+    }
+
+    public function updateMySignature(Request $request)
+    {
+        $signature = $request->signature;
+
+        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
+
+        $user = $request->user();
+
+        if (Storage::disk('public')->exists($signature)) {
+            Storage::disk('public')->delete($signature);
+        }
+
+        $user->update([
+            'signature' => $path
+        ]);
+
+        return response()->json([
+            'message' => 'Signature added successfully'
         ], 200);
     }
 }

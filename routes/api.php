@@ -165,4 +165,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/request-access/{id}/update', 'update');
         Route::delete('/request-access/{id}/delete', 'destroy');
     });
+
+    Route::post('/bulk-upload-users', [UserController::class, 'uploadBulkUser']);
+
+    Route::post('/update-signature', [UserController::class, 'updateMySignature']);
 });
+
+Route::get('/request-reports', [RequestFormController::class, 'requestReports']);
