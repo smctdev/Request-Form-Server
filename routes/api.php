@@ -169,6 +169,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bulk-upload-users', [UserController::class, 'uploadBulkUser']);
 
     Route::post('/update-signature', [UserController::class, 'updateMySignature']);
+    Route::get('/request-reports', [RequestFormController::class, 'requestReports']);
 });
-
-Route::get('/request-reports', [RequestFormController::class, 'requestReports']);
