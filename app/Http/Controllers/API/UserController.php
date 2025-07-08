@@ -310,13 +310,13 @@ class UserController extends Controller
         // Get the base64 string from the request
         $signature = $request->signature;
 
-        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
-
-        $user = $request->user();
-
         if (Storage::disk('public')->exists($signature)) {
             Storage::disk('public')->delete($signature);
         }
+
+        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
+
+        $user = $request->user();
 
         $user->signature = $path;
 
@@ -633,13 +633,13 @@ class UserController extends Controller
     {
         $signature = $request->signature;
 
-        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
-
-        $user = $request->user();
-
         if (Storage::disk('public')->exists($signature)) {
             Storage::disk('public')->delete($signature);
         }
+
+        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
+
+        $user = $request->user();
 
         $user->update([
             'signature' => $path
