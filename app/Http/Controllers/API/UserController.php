@@ -318,8 +318,6 @@ class UserController extends Controller
 
         $user = $request->user();
 
-      
-
         $user->signature = $path;
 
         $user->save();
