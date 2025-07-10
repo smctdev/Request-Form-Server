@@ -582,6 +582,8 @@ class UserController extends Controller
         $files = $request->data;
         $users = [];
 
+        $password = Hash::make('temp_password');
+
         foreach ($files as $file) {
 
             $branch = Branch::firstOrCreate(
@@ -626,7 +628,7 @@ class UserController extends Controller
                 'position'          => $position->value,
                 'role'              => 'User',
                 'email_verified_at' => now(),
-                'password'          => Hash::make('temp_password'),
+                'password'          => $password,
                 'signature'         => null,
                 'profile_picture'   => null,
                 'remember_token'    => null,
