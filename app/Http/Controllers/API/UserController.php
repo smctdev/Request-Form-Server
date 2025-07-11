@@ -598,9 +598,9 @@ class UserController extends Controller
             );
 
             $position = Position::firstOrCreate([
-                'label' => $file[8],
+                'label'     => $file[8],
             ], [
-                'value' => $file[8],
+                'value'     => $file[8],
             ]);
 
             $exists = User::where('employee_id', $file[6])
