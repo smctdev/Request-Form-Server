@@ -142,9 +142,9 @@ class ApprovalProcessController extends Controller
                     $nextApprover->notify(new ApprovalProcessNotification($nextApprovalProcess, $firstname, $requestForm, $requesterFirstname, $requesterLasttname));
                     event(new NotificationEvent(Auth::user()->id, $nextApprovalProcess->user->id));
 
-                   // $user = User::where('id', $requestForm->user_id)->first();
+                    // $user = User::where('id', $requestForm->user_id)->first();
 
-                   // $user->notify(new OngoingNotification($requestForm, 'ongoing', $user->firstName, $requestForm->form_type, $request_code));
+                    // $user->notify(new OngoingNotification($requestForm, 'ongoing', $user->firstName, $requestForm->form_type, $request_code));
 
                     // Broadcast the notification count update
                     $message = 'You have a request form to approve';
@@ -621,7 +621,7 @@ class ApprovalProcessController extends Controller
                 'form_data' => $requestForm?->form_data, // Assuming form_data is JSON
                 'status' => $approvalProcess->status, // Include the actual status of the approval process
                 'completed_status' => $requestForm?->status, // Include the actual status of the approval process
-                'created_at' => $approvalProcess->created_at,
+                // 'created_at' => $approvalProcess->created_at,
                 'currency' => $requestForm?->currency,
                 'updated_at' => $approvalProcess->updated_at,
                 'user_id' => $requestForm?->user_id,
@@ -636,9 +636,13 @@ class ApprovalProcessController extends Controller
                 'branch' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branchNa?->branch_name . 'ㅤ'),
                 'request_code' => "{$branchName}-{$requestForm?->request_code}",
                 'approved_attachment' => $attachments,
-                'completed_code' => $requestForm?->completed_code
+                'completed_code' => $requestForm?->completed_code,
+                'created_at' => $requestForm?->created_at
             ];
-        })->filter()->values(); // Filter out null values
+        })
+            ->filter()
+            ->values()
+            ->sortByDesc('created_at'); // Filter out null values
 
 
         return response()->json([

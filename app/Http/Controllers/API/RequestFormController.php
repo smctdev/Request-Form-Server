@@ -999,7 +999,7 @@ class RequestFormController extends Controller
         $date_to = request('date_to', '');
         $date_from = request('date_from', '');
 
-        $requestReports = RequestForm::with('user', 'branchCode')
+        $requestReports = RequestForm::with('user', 'branchCode', 'approvalProcess.user')
             ->when(
                 $search,
                 fn($query)
@@ -1038,41 +1038,46 @@ class RequestFormController extends Controller
             ->paginate($per_page);
 
         $requestReports->getCollection()->transform(fn($requestReport) => [
-            'id'                => $requestReport->id,
-            'user_id'           => $requestReport->user_id,
-            'form_type'         => $requestReport->form_type,
-            'form_data'         => $requestReport->form_data,
-            'created_at'        => $requestReport->created_at,
-            'updated_at'        => $requestReport->updated_at,
-            'user'              => $requestReport->user,
-            'currency'          => $requestReport->currency,
-            'status'            => $requestReport->status,
-            'attachment'        => $requestReport->attachment,
-            'branch_code'       => $requestReport->branchCode,
-            'request_code'      => $requestReport->request_code,
-            'completed_code'    => $requestReport->completed_code,
-            'approved_bies'     => User::whereIn('id', $requestReport->approved_by)
-                ->get([
-                    'firstName',
-                    'lastName',
-                    'id',
-                    'branch_code',
-                    'position',
-                    'signature',
-                    'profile_picture',
-                    'employee_id'
-                ]),
-            'noted_bies'        => User::whereIn('id', $requestReport->noted_by)
-                ->get([
-                    'firstName',
-                    'lastName',
-                    'id',
-                    'branch_code',
-                    'position',
-                    'signature',
-                    'profile_picture',
-                    'employee_id'
+            'id'                          => $requestReport->id,
+            'user_id'                     => $requestReport->user_id,
+            'form_type'                   => $requestReport->form_type,
+            'form_data'                   => $requestReport->form_data,
+            'created_at'                  => $requestReport->created_at,
+            'updated_at'                  => $requestReport->updated_at,
+            'user'                        => $requestReport->user,
+            'currency'                    => $requestReport->currency,
+            'status'                      => $requestReport->status,
+            'attachment'                  => $requestReport->attachment,
+            'branch_code'                 => $requestReport->branchCode,
+            'request_code'                => $requestReport->request_code,
+            'completed_code'              => $requestReport->completed_code,
+            'approved_bies'               => $requestReport->approvalProcess
+                ->whereIn('user_id', $requestReport->approved_by)
+                ->map(fn($process) => [
+                    'comment'             => $process->comment,
+                    'firstName'           => $process->user->firstName,
+                    'lastName'            => $process->user->lastName,
+                    'position'            => $process->user->position,
+                    'signature'           => $process->user->signature,
+                    'status'              => $process->status
+
                 ])
+                ->values(),
+            'noted_bies'                  => $requestReport->approvalProcess
+                ->whereIn('user_id', $requestReport->noted_by)
+                ->map(fn($process) => [
+                    'comment'             => $process->comment,
+                    'firstName'           => $process->user->firstName,
+                    'lastName'            => $process->user->lastName,
+                    'position'            => $process->user->position,
+                    'signature'           => $process->user->signature,
+                    'status'              => $process->status
+
+                ])
+                ->values(),
+            'approval_process'            => $requestReport->approvalProcess->whereNotNull('comment'),
+            'approved_attachments'        => $requestReport->approvalProcess->whereNotNull('attachment')
+                ->pluck('attachment')
         ]);
 
         return response()->json($requestReports, 200);
