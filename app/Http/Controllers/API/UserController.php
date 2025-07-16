@@ -646,7 +646,7 @@ class UserController extends Controller
         $count = count($users);
 
         return response()->json([
-            'message' => "{$count} users uploaded successfully",
+            'message' => $count > 0 ? "{$count} user(s) uploaded successfully" : "All data in the Excel file is already in the system.",
         ], 201);
     }
 
