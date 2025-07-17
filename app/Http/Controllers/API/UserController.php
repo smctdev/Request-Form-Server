@@ -428,7 +428,7 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
 
-            'profile_picture' => 'nullable|image', // Ensure this validation rule is correct
+            'profile_picture' => 'nullable|image|max:1024', // Ensure this validation rule is correct
         ]);
 
         $user = User::find($id);
