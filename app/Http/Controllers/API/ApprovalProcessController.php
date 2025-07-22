@@ -641,8 +641,8 @@ class ApprovalProcessController extends Controller
             ];
         })
             ->filter()
-            ->values()
-            ->sortByDesc('created_at'); // Filter out null values
+            ->sortByDesc('created_at') // Filter out null values
+            ->values();
 
 
         return response()->json([
