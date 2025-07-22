@@ -419,6 +419,10 @@ class UserController extends Controller
             $user->profile_picture = $path;
         }
 
+        if ($user->role === "User" && $user->whereHas('approverStaffs')) {
+            $user->approverStaffs()->delete();
+        }
+
         $user->save();
 
         return response()->json(['message' => 'User information updated successfully'], 200);
