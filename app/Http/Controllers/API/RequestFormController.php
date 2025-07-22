@@ -996,8 +996,8 @@ class RequestFormController extends Controller
         $per_page = request('per_page', 10);
         $search = request('search', '');
         $status = request('status', '');
-        $date_to = request('date_to', '');
-        $date_from = request('date_from', '');
+        $date_to = request('date_to', '') ? Carbon::parse(request('date_to', ''))->endOfDay() : '';
+        $date_from = request('date_from', '') ? Carbon::parse(request('date_from', ''))->startOfDay() : '';
 
         $requestReports = RequestForm::with('user', 'branchCode', 'approvalProcess.user')
             ->when(
@@ -1033,6 +1033,7 @@ class RequestFormController extends Controller
                 fn($query)
                 =>
                 $query->whereBetween('created_at', [$date_from, $date_to])
+                    ->orWhereBetween('created_at', [$date_to, $date_from])
             )
             ->latest()
             ->paginate($per_page);
