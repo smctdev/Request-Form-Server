@@ -35,7 +35,7 @@ class RegisterController extends Controller
             if ($uservalidate->fails()) {
                 return response()->json([
                     "errors" => $uservalidate->errors(),
-                ]);
+                ], 422);
             }
 
             /*     // Decode and save the signature

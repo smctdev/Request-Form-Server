@@ -1020,6 +1020,13 @@ class RequestFormController extends Controller
                                 ->orWhere('branch', 'LIKE', "%{$search}%")
                                 ->orWhere('acronym', 'LIKE', "%{$search}%")
                         )
+                        ->orWhereHas(
+                            'user',
+                            fn($user)
+                            =>
+                            $user->where('firstName', 'LIKE', "%{$search}%")
+                                ->orWhere('lastName', 'LIKE', "%{$search}%")
+                        )
                 )
             )
             ->when(
