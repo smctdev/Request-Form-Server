@@ -287,32 +287,28 @@ class RequestFormController extends Controller
                 // Check if the user is an AVPFinance
                 $user = DB::table('users')->where('id', $userId)->first();
                 if ($user && $user->position === 'AVP - Finance') {
-                    // Fetch AVPFinance staff
                     $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
-                    if (!empty($avpFinanceRecords)) {
+
+                    if ($avpFinanceRecords->isNotEmpty()) {
                         $avpStaffs = $avpFinanceRecords->pluck('staff_id');
 
-
-                        // Fetch staff's branch assignments
                         $staffBranchAssignments = DB::table('a_v_p_finance_staff')
                             ->whereIn('staff_id', $avpStaffs)
                             ->pluck('branch_id');
 
-                        if (!empty($staffBranchAssignments)) {
-                            $staffBranches = json_decode(isset($staffBranchAssignments), true); // Decode branch_id JSON
-                            // Check if the staff's branches include the request form branch
-                            if (in_array($branchId, $staffBranches)) {
-                               foreach($avpStaffs as $staff){
+                        if ($staffBranchAssignments->isNotEmpty()) {
+                            if ($staffBranchAssignments->contains($branchId)) {
+                                foreach ($avpStaffs as $staff) {
                                     $approvalProcesses[] = [
-                                    'user_id' => $staff,
-                                    'request_form_id' => $requestFormData->id,
-                                    'level' => $level,
-                                    'status' => 'Pending',
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                ];
-                                $level++;
-                               }
+                                        'user_id' => $staff,
+                                        'request_form_id' => $requestFormData->id,
+                                        'level' => $level,
+                                        'status' => 'Pending',
+                                        'created_at' => now(),
+                                        'updated_at' => now(),
+                                    ];
+                                    $level++;
+                                }
                             }
                         }
                     }
