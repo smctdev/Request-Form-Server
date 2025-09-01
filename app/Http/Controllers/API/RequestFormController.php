@@ -297,18 +297,16 @@ class RequestFormController extends Controller
                             ->pluck('branch_id');
 
                         if ($staffBranchAssignments->isNotEmpty()) {
-                            if ($staffBranchAssignments->contains($branchId)) {
-                                foreach ($avpStaffs as $staff) {
-                                    $approvalProcesses[] = [
-                                        'user_id' => $staff,
-                                        'request_form_id' => $requestFormData->id,
-                                        'level' => $level,
-                                        'status' => 'Pending',
-                                        'created_at' => now(),
-                                        'updated_at' => now(),
-                                    ];
-                                    $level++;
-                                }
+                            foreach ($avpStaffs as $staff) {
+                                $approvalProcesses[] = [
+                                    'user_id' => $staff,
+                                    'request_form_id' => $requestFormData->id,
+                                    'level' => $level,
+                                    'status' => 'Pending',
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ];
+                                $level++;
                             }
                         }
                     }
@@ -520,25 +518,19 @@ class RequestFormController extends Controller
                 // Check if the user is an AVPFinance
                 $user = DB::table('users')->where('id', $userId)->first();
                 if ($user && $user->position === 'AVP - Finance') {
-                    // Fetch AVPFinance staff
-                    $avpFinanceRecord = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->first();
-                    if ($avpFinanceRecord) {
-                        $avpStaffs = json_decode($avpFinanceRecord->staff_id, true); // Decode staff_id JSON
+                    $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
 
+                    if ($avpFinanceRecords->isNotEmpty()) {
+                        $avpStaffs = $avpFinanceRecords->pluck('staff_id');
 
-                        // Fetch staff's branch assignments
                         $staffBranchAssignments = DB::table('a_v_p_finance_staff')
-                            ->where('staff_id', $avpStaffs)
-                            ->pluck('branch_id')
-                            ->first();
+                            ->whereIn('staff_id', $avpStaffs)
+                            ->pluck('branch_id');
 
-                        if ($staffBranchAssignments) {
-                            $staffBranches = json_decode($staffBranchAssignments, true); // Decode branch_id JSON
-
-                            // Check if the staff's branches include the request form branch
-                            if (in_array($branchId, $staffBranches)) {
+                        if ($staffBranchAssignments->isNotEmpty()) {
+                            foreach ($avpStaffs as $staff) {
                                 $approvalProcesses[] = [
-                                    'user_id' => $avpStaffs,
+                                    'user_id' => $staff,
                                     'request_form_id' => $requestFormId,
                                     'level' => $level,
                                     'status' => 'Pending',
