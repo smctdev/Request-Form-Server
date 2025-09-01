@@ -419,8 +419,12 @@ class UserController extends Controller
             $user->profile_picture = $path;
         }
 
-        if ($user->role === "User" && $user->whereHas('approverStaffs')) {
+        if ($user->role === "User" && $user->approverStaffs()->exists()) {
             $user->approverStaffs()->delete();
+        }
+
+        if ($user->position !== 'AVP - Finance' && $user->userApprovers()->exists()) {
+            $user->userApprovers()->delete();
         }
 
         $user->save();

@@ -67,9 +67,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(AVPFinanceStaff::class, 'staff_id');
     }
-    public function userApprover()
+    public function userApprovers()
     {
-        return $this->belongsTo(AVPFinanceStaff::class, 'user_id');
+        return $this->hasMany(AVPFinanceStaff::class, 'user_id');
     }
     public function approvalProcess()
     {
