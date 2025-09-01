@@ -288,23 +288,23 @@ class RequestFormController extends Controller
                 $user = DB::table('users')->where('id', $userId)->first();
                 if ($user && $user->position === 'AVP - Finance') {
                     // Fetch AVPFinance staff
-                    $avpFinanceRecord = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->first();
-                    if ($avpFinanceRecord) {
-                        $avpStaffs = $avpFinanceRecord->staff_id;
+                    $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
+                    if (!empty($avpFinanceRecords)) {
+                        $avpStaffs = $avpFinanceRecords->pluck('staff_id');
 
 
                         // Fetch staff's branch assignments
                         $staffBranchAssignments = DB::table('a_v_p_finance_staff')
-                            ->where('staff_id', $avpStaffs)
-                            ->pluck('branch_id')
-                            ->first();
+                            ->whereIn('staff_id', $avpStaffs)
+                            ->pluck('branch_id');
 
-                        if ($staffBranchAssignments) {
-                            $staffBranches = json_decode($staffBranchAssignments, true); // Decode branch_id JSON
+                        if (!empty($staffBranchAssignments)) {
+                            $staffBranches = json_decode(isset($staffBranchAssignments), true); // Decode branch_id JSON
                             // Check if the staff's branches include the request form branch
                             if (in_array($branchId, $staffBranches)) {
-                                $approvalProcesses[] = [
-                                    'user_id' => $avpStaffs,
+                               foreach($avpStaffs as $staff){
+                                    $approvalProcesses[] = [
+                                    'user_id' => $staff,
                                     'request_form_id' => $requestFormData->id,
                                     'level' => $level,
                                     'status' => 'Pending',
@@ -312,6 +312,7 @@ class RequestFormController extends Controller
                                     'updated_at' => now(),
                                 ];
                                 $level++;
+                               }
                             }
                         }
                     }
