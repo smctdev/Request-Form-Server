@@ -57,6 +57,7 @@ class ApprovalProcessNotification extends Notification implements ShouldQueue
                 'approvalUrl' => $approvalUrl,
                 'requesterFirstname' => $this->requesterFirstname,
                 'requesterLastname' => $this->requesterLastname,
+                'request_code' => $this->requestForm->request_code
             ])
             ->subject('You have a new request form need to approve - ' . $this->requestForm->form_type . ' ' . now()->format('Y-m-d H:i:s'))
             ->line('You have a new request form to approve.')
