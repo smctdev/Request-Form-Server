@@ -32,6 +32,57 @@ use Illuminate\Support\Collection;
 class RequestFormController extends Controller
 {
 
+    private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
+    {
+        // if (!$requestFormData) {
+        //     Log::error("Invalid RequestForm data passed to handleAvpFinanceApproval.");
+        //     return;
+        // }
+        // Check if the user is an AVPFinance
+        $user = DB::table('users')->where('id', $userId)->first();
+        if ($user && $user->position === 'AVP - Finance') {
+            $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
+
+            if ($avpFinanceRecords->isNotEmpty()) {
+                $avpStaffs = $avpFinanceRecords->pluck('staff_id');
+
+                $staffBranchAssignments = DB::table('a_v_p_finance_staff')
+                    ->whereIn('staff_id', $avpStaffs)
+                    ->pluck('branch_id');
+
+                if ($staffBranchAssignments->isNotEmpty()) {
+                    if ($staffBranchAssignments->contains($branchId)) {
+                        foreach ($avpStaffs as $staff) {
+                            $approvalProcesses[] = [
+                                'user_id' => $staff,
+                                'request_form_id' => $requestFormData->id,
+                                'level' => $level,
+                                'status' => 'Pending',
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                            $level++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add the AVPFinance user to the approval process
+
+
+        $approvalProcesses[] = [
+            'user_id' => $userId,
+            'request_form_id' => $requestFormData->id,
+            'level' => $level,
+            'status' => 'Pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        $level++;
+    }
+
     //CREATE REQUEST
     public function createRequest(Request $request)
     {
@@ -72,6 +123,7 @@ class RequestFormController extends Controller
                     'message' => 'User not found',
                 ], 404);
             }
+
             $branchCode = $user->branch_code;
 
 
@@ -278,54 +330,6 @@ class RequestFormController extends Controller
             ]);
 
             // Helper function to handle AVPFinance users and their staff
-            function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
-            {
-                // if (!$requestFormData) {
-                //     Log::error("Invalid RequestForm data passed to handleAvpFinanceApproval.");
-                //     return;
-                // }
-                // Check if the user is an AVPFinance
-                $user = DB::table('users')->where('id', $userId)->first();
-                if ($user && $user->position === 'AVP - Finance') {
-                    $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
-
-                    if ($avpFinanceRecords->isNotEmpty()) {
-                        $avpStaffs = $avpFinanceRecords->pluck('staff_id');
-
-                        $staffBranchAssignments = DB::table('a_v_p_finance_staff')
-                            ->whereIn('staff_id', $avpStaffs)
-                            ->pluck('branch_id');
-
-                        if ($staffBranchAssignments->isNotEmpty()) {
-                            foreach ($avpStaffs as $staff) {
-                                $approvalProcesses[] = [
-                                    'user_id' => $staff,
-                                    'request_form_id' => $requestFormData->id,
-                                    'level' => $level,
-                                    'status' => 'Pending',
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                ];
-                                $level++;
-                            }
-                        }
-                    }
-                }
-
-                // Add the AVPFinance user to the approval process
-
-
-                $approvalProcesses[] = [
-                    'user_id' => $userId,
-                    'request_form_id' => $requestFormData->id,
-                    'level' => $level,
-                    'status' => 'Pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-
-                $level++;
-            }
 
             // Initialize approval process variables
             $level = 1;
@@ -347,7 +351,7 @@ class RequestFormController extends Controller
             foreach ($approvers as $approverGroup) {
                 foreach ($approverGroup['ids'] as $approverId) {
                     // Use the helper function to handle AVPFinance and their staff
-                    handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $requestFormData, $branchCode);
+                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $requestFormData, $branchCode);
                 }
             }
 
@@ -512,49 +516,6 @@ class RequestFormController extends Controller
             $level = 1;
             $approvalProcesses = [];
 
-            // Function to handle AVPFinance users and their staff
-            function handleAvpFinanceApprovals($userId, &$approvalProcesses, &$level, $requestFormId, $branchId)
-            {
-                // Check if the user is an AVPFinance
-                $user = DB::table('users')->where('id', $userId)->first();
-                if ($user && $user->position === 'AVP - Finance') {
-                    $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
-
-                    if ($avpFinanceRecords->isNotEmpty()) {
-                        $avpStaffs = $avpFinanceRecords->pluck('staff_id');
-
-                        $staffBranchAssignments = DB::table('a_v_p_finance_staff')
-                            ->whereIn('staff_id', $avpStaffs)
-                            ->pluck('branch_id');
-
-                        if ($staffBranchAssignments->isNotEmpty()) {
-                            foreach ($avpStaffs as $staff) {
-                                $approvalProcesses[] = [
-                                    'user_id' => $staff,
-                                    'request_form_id' => $requestFormId,
-                                    'level' => $level,
-                                    'status' => 'Pending',
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                ];
-                                $level++;
-                            }
-                        }
-                    }
-                }
-
-                // Add the AVPFinance user to the approval process
-                $approvalProcesses[] = [
-                    'user_id' => $userId,
-                    'request_form_id' => $requestFormId,
-                    'level' => $level,
-                    'status' => 'Pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $level++;
-            }
-
             // Build approvers list properly
             $approvers = [];
 
@@ -569,7 +530,7 @@ class RequestFormController extends Controller
             foreach ($approvers as $approverGroup) {
                 foreach ($approverGroup['ids'] as $approverId) {
                     // Use the helper function to handle AVPFinance and their staff
-                    handleAvpFinanceApprovals($approverId, $approvalProcesses, $level, $request_data->id, $request_data->branch_code);
+                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $request_data->id, $request_data->branch_code);
                 }
             }
 
