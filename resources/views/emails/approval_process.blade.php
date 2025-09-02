@@ -64,7 +64,7 @@
                                                         </tr>
                                                         <tr>
                                                             <td>Date Requested:</td>
-                                                            <td>{{$request_form->created_at}}</td>
+                                                            <td>{{$date}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td>Requested by:</td>
