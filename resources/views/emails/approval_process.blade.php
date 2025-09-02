@@ -60,7 +60,7 @@
                                                         </tr>
                                                         <tr>
                                                             <td>Request Form Type:</td>
-                                                            <td>{{$approvalProcess->RequestForm->form_type}}</td>
+                                                            <td>{{$approvalProcess->requestForm->form_type}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td>Date Requested:</td>
