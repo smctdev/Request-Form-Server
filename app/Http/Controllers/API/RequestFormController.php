@@ -50,7 +50,9 @@ class RequestFormController extends Controller
                     ->whereIn('staff_id', $avpStaffs)
                     ->get();
 
-                $staff = $staffBranchAssignments->whereJsonContains('branch_id', $branchId)->first();
+                $staff = $staffBranchAssignments->filter(function ($assignment) use ($branchId) {
+                    return $assignment->branch_id->contains($branchId);
+                })->first();
 
                 $approvalProcesses[] = [
                     'user_id' => $staff->staff_id,
