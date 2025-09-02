@@ -55,8 +55,8 @@
                                                     <p>The request form details are provided below:</p>
                                                     <table style="margin-bottom: 60px;">
                                                         <tr>
-                                                            <td>Request Form ID:</td>
-                                                            <td>{{$request_code}}</td>
+                                                            {{-- <td>Request Form ID:</td>
+                                                            <td>{{$request_code}}</td> --}}
                                                         </tr>
                                                         <tr>
                                                             <td>Request Form Type:</td>
