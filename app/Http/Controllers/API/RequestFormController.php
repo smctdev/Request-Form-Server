@@ -30,9 +30,8 @@ use Illuminate\Support\Collection;
 
 class RequestFormController extends Controller
 {
-
-    private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
-    {
+      private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
+      {
         // if (!$requestFormData) {
         //     Log::error("Invalid RequestForm data passed to handleAvpFinanceApproval.");
         //     return;
@@ -75,6 +74,7 @@ class RequestFormController extends Controller
 
         $level++;
     }
+
 
     //CREATE REQUEST
     public function createRequest(Request $request)
