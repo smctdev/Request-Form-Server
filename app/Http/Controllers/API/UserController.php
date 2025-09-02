@@ -307,11 +307,13 @@ class UserController extends Controller
         // Get the base64 string from the request
         $signature = $request->signature;
 
-        if (Storage::disk('public')->exists($signature)) {
-            Storage::disk('public')->delete($signature);
+        if (Storage::disk('d_drive')->exists($signature)) {
+            Storage::disk('d_drive')->delete($signature);
         }
 
-        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
+        $filename = Str::random(8) . '.' . $signature->getClientOriginalExtension();
+
+        $path = $signature->storeAs('signature', $filename, 'd_drive');
 
         $user = $request->user();
 
@@ -434,7 +436,7 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
 
-            'profile_picture' => 'nullable|image', // Ensure this validation rule is correct
+            'profile_picture' => 'nullable|image|max:1024', // Ensure this validation rule is correct
         ]);
 
         $user = User::find($id);
@@ -660,11 +662,13 @@ class UserController extends Controller
     {
         $signature = $request->signature;
 
-        if (Storage::disk('public')->exists($signature)) {
-            Storage::disk('public')->delete($signature);
+        if (Storage::disk('d_drive')->exists($signature)) {
+            Storage::disk('d_drive')->delete($signature);
         }
 
-        $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'public');
+        $filename = Str::random(8) . '.' . $signature->getClientOriginalExtension();
+
+        $path = $signature->storeAs('signature', $filename, 'd_drive');
 
         $user = $request->user();
 
