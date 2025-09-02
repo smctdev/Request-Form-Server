@@ -394,7 +394,7 @@ class ApproverController extends Controller
         // Check if the branch ID already exists in the JSON column of a_v_p_finance_staff
         $branchId = $request->input('branch_id');
         $exists = DB::table('a_v_p_finance_staff')
-            ->whereJsonContains('branch_id', $branchId)
+            ->whereJsonContains('branch_id', (int) $branchId)
             ->exists();
 
         if ($exists) {
