@@ -10,7 +10,7 @@ use App\Events\NotificationEvent;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
-class ApprovalProcessNotification extends Notification implements ShouldQueue   
+class ApprovalProcessNotification extends Notification implements ShouldQueue
 {
     use Queueable, InteractsWithSockets;
 
@@ -41,7 +41,7 @@ class ApprovalProcessNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return ['database', 'broadcast', 'mail'];
     }
 
     /**
