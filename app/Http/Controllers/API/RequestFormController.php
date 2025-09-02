@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
@@ -46,13 +45,10 @@ class RequestFormController extends Controller
             if ($avpFinanceRecords->isNotEmpty()) {
                 $avpStaffs = $avpFinanceRecords->pluck('staff_id');
 
-                $staffBranchAssignments = DB::table('a_v_p_finance_staff')
+                $staff = AVPFinanceStaff::query()
                     ->whereIn('staff_id', $avpStaffs)
-                    ->get();
-
-                $staff = $staffBranchAssignments->filter(function ($assignment) use ($branchId) {
-                    return $assignment->branch_id->contains($branchId);
-                })->first();
+                    ->whereJsonContains('branch_id', (int) $branchId)
+                    ->first();
 
                 $approvalProcesses[] = [
                     'user_id' => $staff->staff_id,
@@ -67,7 +63,6 @@ class RequestFormController extends Controller
         }
 
         // Add the AVPFinance user to the approval process
-
 
         $approvalProcesses[] = [
             'user_id' => $userId,
