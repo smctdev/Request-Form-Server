@@ -36,41 +36,37 @@ private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level,
     $user = DB::table('users')->where('id', $userId)->first();
 
     if ($user && $user->position === 'AVP - Finance') {
+        // Get all staff records for this AVP user
         $avpStaffRecords = DB::table('a_v_p_finance_staff')
             ->where('user_id', $userId)
             ->get();
 
-        $matched = false;
+        $matchedStaff = null;
 
-        if ($avpStaffRecords->isNotEmpty()) {
-            foreach ($avpStaffRecords as $staffRecord) {
-                $staffId = $staffRecord->staff_id;
+        foreach ($avpStaffRecords as $staffRecord) {
+            // Decode branch_id JSON array
+            $branches = json_decode($staffRecord->branch_id, true);
 
-                // Check if staff is assigned to the request's branch
-                $isAssignedToBranch = DB::table('a_v_p_finance_staff')
-                    ->where('staff_id', $staffId)
-                    ->where('branch_id', $branchId)
-                    ->exists();
-
-                if ($isAssignedToBranch) {
-                    // Add matched staff to approval process
-                    $approvalProcesses[] = [
-                        'user_id' => $staffId,
-                        'request_form_id' => $requestFormData->id,
-                        'level' => $level,
-                        'status' => 'Pending',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                    $level++;
-
-                    $matched = true;
-                    break; // Stop after first match since only one staff per branch
-                }
+            if (is_array($branches) && in_array($branchId, $branches)) {
+                $matchedStaff = $staffRecord;
+                break; // Found the staff assigned to the branch, stop searching
             }
         }
 
-        // Add the AVP-Finance user to the approval process (either after staff or alone)
+        if ($matchedStaff) {
+            // Add the matched staff to approval processes first
+            $approvalProcesses[] = [
+                'user_id' => $matchedStaff->staff_id,
+                'request_form_id' => $requestFormData->id,
+                'level' => $level,
+                'status' => 'Pending',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            $level++;
+        }
+
+        // Add the AVP-Finance user next (always)
         $approvalProcesses[] = [
             'user_id' => $userId,
             'request_form_id' => $requestFormData->id,
@@ -82,6 +78,7 @@ private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level,
         $level++;
     }
 }
+
 
     //CREATE REQUEST
     public function createRequest(Request $request)
