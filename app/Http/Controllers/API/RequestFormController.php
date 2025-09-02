@@ -31,44 +31,46 @@ use Illuminate\Support\Collection;
 
 class RequestFormController extends Controller
 {
+private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
+{
+    $user = DB::table('users')->where('id', $userId)->first();
 
-    private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
-    {
-        // if (!$requestFormData) {
-        //     Log::error("Invalid RequestForm data passed to handleAvpFinanceApproval.");
-        //     return;
-        // }
-        // Check if the user is an AVPFinance
-        $user = DB::table('users')->where('id', $userId)->first();
-        if ($user && $user->position === 'AVP - Finance') {
-            $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
+    if ($user && $user->position === 'AVP - Finance') {
+        $avpStaffRecords = DB::table('a_v_p_finance_staff')
+            ->where('user_id', $userId)
+            ->get();
 
-            if ($avpFinanceRecords->isNotEmpty()) {
-                $avpStaffs = $avpFinanceRecords->pluck('staff_id');
+        $matched = false;
 
-                $staffBranchAssignments = DB::table('a_v_p_finance_staff')
-                    ->whereIn('staff_id', $avpStaffs)
-                    ->get();
+        if ($avpStaffRecords->isNotEmpty()) {
+            foreach ($avpStaffRecords as $staffRecord) {
+                $staffId = $staffRecord->staff_id;
 
-                $staff = $staffBranchAssignments->filter(function ($assignment) use ($branchId) {
-                    return $assignment->branch_id->contains($branchId);
-                })->first();
+                // Check if staff is assigned to the request's branch
+                $isAssignedToBranch = DB::table('a_v_p_finance_staff')
+                    ->where('staff_id', $staffId)
+                    ->where('branch_id', $branchId)
+                    ->exists();
 
-                $approvalProcesses[] = [
-                    'user_id' => $staff->staff_id,
-                    'request_form_id' => $requestFormData->id,
-                    'level' => $level,
-                    'status' => 'Pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $level++;
+                if ($isAssignedToBranch) {
+                    // Add matched staff to approval process
+                    $approvalProcesses[] = [
+                        'user_id' => $staffId,
+                        'request_form_id' => $requestFormData->id,
+                        'level' => $level,
+                        'status' => 'Pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                    $level++;
+
+                    $matched = true;
+                    break; // Stop after first match since only one staff per branch
+                }
             }
         }
 
-        // Add the AVPFinance user to the approval process
-
-
+        // Add the AVP-Finance user to the approval process (either after staff or alone)
         $approvalProcesses[] = [
             'user_id' => $userId,
             'request_form_id' => $requestFormData->id,
@@ -77,9 +79,9 @@ class RequestFormController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ];
-
         $level++;
     }
+}
 
     //CREATE REQUEST
     public function createRequest(Request $request)
