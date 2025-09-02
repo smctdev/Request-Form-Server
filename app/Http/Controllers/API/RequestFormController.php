@@ -48,23 +48,19 @@ class RequestFormController extends Controller
 
                 $staffBranchAssignments = DB::table('a_v_p_finance_staff')
                     ->whereIn('staff_id', $avpStaffs)
-                    ->pluck('branch_id');
+                    ->get();
 
-                if ($staffBranchAssignments->isNotEmpty()) {
-                    if ($staffBranchAssignments->contains($branchId)) {
-                        foreach ($avpStaffs as $staff) {
-                            $approvalProcesses[] = [
-                                'user_id' => $staff,
-                                'request_form_id' => $requestFormData->id,
-                                'level' => $level,
-                                'status' => 'Pending',
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
-                            $level++;
-                        }
-                    }
-                }
+                $staff = $staffBranchAssignments->whereJsonContains('branch_id', $branchId)->first();
+
+                $approvalProcesses[] = [
+                    'user_id' => $staff->staff_id,
+                    'request_form_id' => $requestFormData->id,
+                    'level' => $level,
+                    'status' => 'Pending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $level++;
             }
         }
 
