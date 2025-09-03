@@ -31,8 +31,8 @@ use Illuminate\Support\Collection;
 
 class RequestFormController extends Controller
 {
-      private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
-      {
+    private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
+    {
         // if (!$requestFormData) {
         //     Log::error("Invalid RequestForm data passed to handleAvpFinanceApproval.");
         //     return;
@@ -365,7 +365,7 @@ class RequestFormController extends Controller
                 if ($staff) {
                     $staff->notify(new ApprovalProcessNotification(
                         $firstApprovalProcess,
-                        $firstApprover->firstName,
+                        $staff->firstName,
                         $requestFormData,
                         $user->firstName,
                         $user->lastName
@@ -373,7 +373,7 @@ class RequestFormController extends Controller
                 } else {
                     $firstApprover->notify(new ApprovalProcessNotification(
                         $firstApprovalProcess,
-                        $firstApprover->firstName,
+                        $firstApprovalProcess->firstName,
                         $requestFormData,
                         $user->firstName,
                         $user->lastName
