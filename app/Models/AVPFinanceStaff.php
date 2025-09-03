@@ -16,9 +16,12 @@ class AVPFinanceStaff extends Model
         'branch_id',
     ];
 
-    protected $casts = [
-        'branch_id' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'branch_id' => 'json',
+        ];
+    }
 
     public function branch()
     {
