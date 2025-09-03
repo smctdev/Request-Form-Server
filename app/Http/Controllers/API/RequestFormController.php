@@ -373,7 +373,7 @@ class RequestFormController extends Controller
                 } else {
                     $firstApprover->notify(new ApprovalProcessNotification(
                         $firstApprovalProcess,
-                        $staff->firstName,
+                        $firstApprovalProcess->firstName,
                         $requestFormData,
                         $user->firstName,
                         $user->lastName
