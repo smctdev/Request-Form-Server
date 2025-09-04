@@ -82,7 +82,7 @@ class ApprovalProcessNotification extends Notification implements ShouldQueue
             'requesterLastname' => $this->requesterLastname,
             'request_reference' => 'approver',
             'request_id' => $this->approvalProcess->requestForm->id,
-
+            'current_year' => now()->format('Y'),
             //'level' => $this->approvalProcess->level,
             //'status' => $this->approvalProcess->status,
         ];

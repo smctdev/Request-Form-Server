@@ -19,24 +19,23 @@ class ReturnRequestNotification extends Notification implements ShouldQueue
      * Create a new notification instance.
      */
 
-     protected $requestForm;
-     protected $status;
+    protected $requestForm;
+    protected $status;
 
-     protected $firstname;
-     protected $approverFirstname;
-     protected $approverLastname;
-     protected $comment;
-     protected $requested_code;
-    public function __construct($requestForm, $status, $firstname,$approverFirstname,$approverLastname,$request_code,$comment)
+    protected $firstname;
+    protected $approverFirstname;
+    protected $approverLastname;
+    protected $comment;
+    protected $requested_code;
+    public function __construct($requestForm, $status, $firstname, $approverFirstname, $approverLastname, $request_code, $comment)
     {
         $this->requestForm = $requestForm;
         $this->status = $status;
         $this->firstname = $firstname;
-        $this->approverFirstname =$approverFirstname;
-        $this->approverLastname =$approverLastname;
-        $this->comment=$comment;
-        $this->requested_code=$request_code;
-
+        $this->approverFirstname = $approverFirstname;
+        $this->approverLastname = $approverLastname;
+        $this->comment = $comment;
+        $this->requested_code = $request_code;
     }
 
     /**
@@ -46,7 +45,7 @@ class ReturnRequestNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail','database','broadcast'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     /**
@@ -54,28 +53,27 @@ class ReturnRequestNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-
-        Log::info($this->requestForm->created_at);
         $approvalUrl = route('view.single.request.form.for.approval', ['request_form_id' => $this->requestForm->id]);
-                    return (new MailMessage)
-                    ->view('emails.return_request',[
-                        'requestForm' => $this->requestForm,
-                        'firstname' =>$this->firstname,
-                        'approvalUrl' => $approvalUrl,
-                        'status' =>$this->status,
-                        'approverFirstname' =>$this->approverFirstname,
-                        'approverLastname' =>$this->approverLastname,
-                        'request_code' => $this->requested_code,
-                        'comment' =>$this->comment,
-                        'date' => Carbon::parse($this->requestForm->created_at)->format('F j, Y')
+        return (new MailMessage)
+            ->view('emails.return_request', [
+                'requestForm' => $this->requestForm,
+                'firstname' => $this->firstname,
+                'approvalUrl' => $approvalUrl,
+                'status' => $this->status,
+                'approverFirstname' => $this->approverFirstname,
+                'approverLastname' => $this->approverLastname,
+                'request_code' => $this->requested_code,
+                'comment' => $this->comment,
+                'date' => Carbon::parse($this->requestForm->created_at)->format('F j, Y'),
+                'current_year' => now()->format('Y'),
 
-                        ])
-                        ->subject('Request Form Update - '.$this->requestForm->form_type. ' '.now()->format('Y-m-d H:i:s'))
-                        ->line('Your request has been returned because it is ' . $this->status)
-                        ->line('Request Type: '.$this->requestForm->form_type)
-                        ->line('Status:' . $this->status)
-                        ->action('Notification Action', url('/'));
-                    }
+            ])
+            ->subject('Request Form Update - ' . $this->requestForm->form_type . ' ' . now()->format('Y-m-d H:i:s'))
+            ->line('Your request has been returned because it is ' . $this->status)
+            ->line('Request Type: ' . $this->requestForm->form_type)
+            ->line('Status:' . $this->status)
+            ->action('Notification Action', url('/'));
+    }
 
     /**
      * Get the array representation of the notification.
@@ -86,22 +84,22 @@ class ReturnRequestNotification extends Notification implements ShouldQueue
     {
         $approvalUrl = route('view.single.request.form.for.approval', ['request_form_id' => $this->requestForm->id]);
         return [
-            'message' => 'Your request has been returned because it is ' . $this->status . ' by '. $this->approverFirstname.' '. $this->approverLastname,
+            'message' => 'Your request has been returned because it is ' . $this->status . ' by ' . $this->approverFirstname . ' ' . $this->approverLastname,
             'requestForm' => $this->requestForm->form_type,
             'status' => $this->status,
             'created_at' => now()->toDateTimeString(),
-            'firstname' =>$this->firstname,
+            'firstname' => $this->firstname,
             'approvalUrl' => $approvalUrl,
-            'approverFirstname' =>$this->approverFirstname,
-            'approverLastname' =>$this->approverLastname,
-            'comment' =>$this->comment,
+            'approverFirstname' => $this->approverFirstname,
+            'approverLastname' => $this->approverLastname,
+            'comment' => $this->comment,
             'request_reference' => 'requester',
             'request_id' => $this->requestForm->id,
         ];
     }
 
 
-   /*  public function toBroadcast($notifiable)
+    /*  public function toBroadcast($notifiable)
     {
         //broadcast(new NotificationEvent($this->toArray($notifiable)));
         return new BroadcastMessage([

@@ -85,7 +85,7 @@
                                                     style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; padding: 20px;">
                                                     <p
                                                         style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; line-height: 1.5em; margin-top: 0; color: #F5F5F5; font-size: 14px; text-align: center;">
-                                                        © 2024 SMCT. All rights reserved.</p>
+                                                        © {{ $current_year }} SMCT. All rights reserved.</p>
                                                 </td>
                                             </tr>
                                         </tbody>
