@@ -35,7 +35,7 @@ class EmployeeNotification extends Notification implements ShouldQueue
         $this->firstname = $firstname;
         $this->formtype = $formtype;
         $this->request_code = $request_code;
-         $this->comment = $comment;
+        $this->comment = $comment;
     }
 
     /**
@@ -61,14 +61,13 @@ class EmployeeNotification extends Notification implements ShouldQueue
                 'formtype' => $this->formtype,
                 'request_code' => $this->request_code,
                 'comment' => $this->comment,
-                'date' => Carbon::parse($this->requestForm->created_at)->format('F j, Y')
-
+                'date' => Carbon::parse($this->requestForm->created_at)->format('F j, Y'),
+                'current_year' => now()->format('Y'),
             ])
             ->subject('Request Form Update - ' . $this->requestForm->form_type . ' ' . now()->format('Y-m-d H:i:s'))
             ->line('Your request has been ' . $this->status)
             ->line('Request Type: ' . $this->requestForm->form_type)
             ->line('Status:' . $this->status);
-
     }
 
     /**
