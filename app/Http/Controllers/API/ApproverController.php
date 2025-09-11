@@ -235,6 +235,8 @@ class ApproverController extends Controller
         $dsmtId = Branch::where('branch_code', 'DSMT')
             ->value('id');
 
+        \Log::info($dsmtId);
+
         // Return an error if an exception occurs
         try {
 
@@ -263,15 +265,12 @@ class ApproverController extends Controller
 
 
             $sameBranchApprovers = User::with('approverStaffs')
-                ->where('branch_code', $requesterBranch)
-                // ->orWhere('branch_code', $dsmtId)
+                ->whereIn('branch_code', [$requesterBranch, $dsmtId])
                 ->whereDoesntHave('approverStaffs')
                 ->where('role', 'approver')
                 ->doesntHave('approverStaffs')
                 ->where('position', '!=', 'Area Manager')
-
                 ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
-
                 ->get();
 
 
