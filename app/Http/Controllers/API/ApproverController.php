@@ -264,7 +264,7 @@ class ApproverController extends Controller
 
             $sameBranchApprovers = User::with('approverStaffs')
                 ->where('branch_code', $requesterBranch)
-                ->orWhere('branch_code', $dsmtId)
+                // ->orWhere('branch_code', $dsmtId)
                 ->whereDoesntHave('approverStaffs')
                 ->where('role', 'approver')
                 ->doesntHave('approverStaffs')
