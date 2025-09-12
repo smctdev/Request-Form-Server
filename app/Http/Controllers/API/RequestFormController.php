@@ -525,7 +525,7 @@ class RequestFormController extends Controller
             foreach ($approvers as $approverGroup) {
                 foreach ($approverGroup['ids'] as $approverId) {
                     // Use the helper function to handle AVPFinance and their staff
-                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $request_data->id, $request_data->branch_code);
+                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $request_data, $request_data->branch_code);
                 }
             }
 
