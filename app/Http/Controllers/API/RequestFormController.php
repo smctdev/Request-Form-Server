@@ -1027,8 +1027,8 @@ class RequestFormController extends Controller
 
                 ])
                 ->values(),
-            'approval_process'            => $requestReport->approvalProcess->whereNotNull('comment'),
-            'approved_attachments'        => $requestReport->approvalProcess->whereNotNull('attachment')
+            'approval_process'            => $requestReport->approvalProcess->whereNotNull('comment')->values(),
+            'approved_attachments'        => $requestReport->approvalProcess->whereNotNull('attachment')->values()
                 ->pluck('attachment')
         ]);
 
