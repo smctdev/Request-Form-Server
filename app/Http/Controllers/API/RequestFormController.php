@@ -468,7 +468,8 @@ class RequestFormController extends Controller
 
             if ($request->hasFile('new_attachments')) {
                 foreach ($request->file('new_attachments') as $file) {
-                    $attachment_paths[] = $file->store('request_form_attachments', 'd_drive'); // Add new file paths
+                    $fileName = time() . '-' . $file->getClientOriginalName();
+                    $attachment_paths[] = $file->storeAs('request_form_attachments', $fileName, 'd_drive'); // Add new file paths
                 }
             }
 
