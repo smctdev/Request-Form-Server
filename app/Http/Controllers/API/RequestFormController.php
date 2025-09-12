@@ -463,6 +463,8 @@ class RequestFormController extends Controller
             // Initialize attachment paths
             $existing_attachments = json_decode($request_data->attachment, associative: true) ?? [];
 
+            $user = Auth::user();
+
             // Process new attachments (upload)
             $attachment_paths = $existing_attachments; // Start with existing attachments
 
@@ -525,7 +527,7 @@ class RequestFormController extends Controller
             foreach ($approvers as $approverGroup) {
                 foreach ($approverGroup['ids'] as $approverId) {
                     // Use the helper function to handle AVPFinance and their staff
-                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $request_data, $request_data->branch_code);
+                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $request_data, $user->branch_code);
                 }
             }
 
