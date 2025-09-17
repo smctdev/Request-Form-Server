@@ -448,12 +448,8 @@ class RequestFormController extends Controller
     public function updateRequest(Request $request, $id)
     {
 
-        DB::beginTransaction(); // Start transaction
-
-        try {
-            // Find the request form by ID
+        DB::transaction(function () use ($request, $id) {
             $request_data = RequestForm::with('approvalProcess')->findOrFail($id);
-
             // Decode JSON strings
             $form_data_content = json_decode($request->input('form_data'), true);
             //$noted_by = !empty(json_decode($request->input('noted_by'), true)) ? json_decode($request->input('noted_by'), true) : null;
@@ -535,7 +531,7 @@ class RequestFormController extends Controller
             ApprovalProcess::insert($approvalProcesses);
 
             // Notify first approver
-            $firstApprover = $noted_by !== null ? $noted_by[0] : $approved_by[0];
+            $firstApprover = !empty($noted_by) ? $noted_by[0] : $approved_by[0];
             if ($firstApprover) {
                 $firstApproverUser = User::with('approverStaffs')->find($firstApprover);
 
@@ -565,22 +561,8 @@ class RequestFormController extends Controller
                 }
             }
 
-            DB::commit(); // Commit transaction
-
             return response()->json(['message' => 'Request form updated successfully'], 200);
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack(); // Rollback transaction on error
-            return response()->json([
-                'message' => 'Request form not found',
-                'error' => $e->getMessage(),
-            ], 404);
-        } catch (\Exception $e) {
-            DB::rollBack(); // Rollback transaction on error
-            return response()->json([
-                'message' => 'Failed to update request form',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        });
     }
 
     public function uploadAttachments(Request $request, $requestFormId)
