@@ -81,18 +81,18 @@ class RequestFormController extends Controller
     public function createRequest(Request $request)
     {
         $formDataDecoded = json_decode($request->form_data);
+        // Validate request data
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'form_type' => 'required|string',
+            'form_data' => 'required|string', // Temporarily string for decoding
+            'noted_by' => 'string',
+            'currency' => 'required_if:form_type,Cash Disbursement Requisition Slip|string|in:PHP,USD,EUR',
+            'approved_by' => 'required|string',
+            'attachment.*' => 'file|mimes:webp,pdf,png,jpg,jpeg,doc,docx,xls,xlsx,ppt,pptx,bmp,txt,zip,gif,ico|max:3072',
+        ]);
 
         try {
-            // Validate request data
-            $validated = $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'form_type' => 'required|string',
-                'form_data' => 'required|string', // Temporarily string for decoding
-                'noted_by' => 'string',
-                'currency' => 'required_if:form_type,Cash Disbursement Requisition Slip|string|in:PHP,USD,EUR',
-                'approved_by' => 'required|string',
-                'attachment.*' => 'file|mimes:webp,pdf,png,jpg,jpeg,doc,docx,xls,xlsx,ppt,pptx,bmp,txt,zip,gif,ico|max:3072',
-            ]);
 
             $userID = $validated['user_id'];
             $formType = $validated['form_type'];
