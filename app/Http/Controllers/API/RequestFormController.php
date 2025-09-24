@@ -91,7 +91,7 @@ class RequestFormController extends Controller
                 'noted_by' => 'string',
                 'currency' => 'required_if:form_type,Cash Disbursement Requisition Slip|string|in:PHP,USD,EUR',
                 'approved_by' => 'required|string',
-                'attachment.*' => 'file|mimes:webp,pdf,png,jpg,jpeg,doc,docx,xls,xlsx,ppt,pptx,bmp,txt,zip,gif,ico,max:3072',
+                'attachment.*' => 'file|mimes:webp,pdf,png,jpg,jpeg,doc,docx,xls,xlsx,ppt,pptx,bmp,txt,zip,gif,ico|max:3072',
             ]);
 
             $userID = $validated['user_id'];
@@ -448,7 +448,7 @@ class RequestFormController extends Controller
     public function updateRequest(Request $request, $id)
     {
         $request->validate([
-            'attachment.*' => 'file|mimes:webp,pdf,png,jpg,jpeg,doc,docx,xls,xlsx,ppt,pptx,bmp,txt,zip,gif,ico,max:3072',
+            'attachment.*' => 'file|mimes:webp,pdf,png,jpg,jpeg,doc,docx,xls,xlsx,ppt,pptx,bmp,txt,zip,gif,ico|max:3072',
         ]);
 
         DB::transaction(function () use ($request, $id) {
