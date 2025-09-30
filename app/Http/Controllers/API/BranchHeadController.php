@@ -36,7 +36,7 @@ class BranchHeadController extends Controller
         try {
 
             $BranchHeads = User::orderBy('firstName', 'asc')
-                ->where('position', 'Branch Manager')
+                ->whereIn('position', ['Branch Manager','Branch Supervisor','Branch Manager/Sales Manager','Branch Supervisor/Sales Supervisor'])
                 ->get();
 
             return response()->json([
