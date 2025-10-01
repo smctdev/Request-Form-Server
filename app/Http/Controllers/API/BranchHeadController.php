@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\BranchHead;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class BranchHeadController extends Controller
@@ -33,10 +34,17 @@ class BranchHeadController extends Controller
 
     public function getAllBranchHeads()
     {
+        $branchHeads = [
+            'Branch Manager',
+            'Branch Manager/Sales Manager',
+            'Branch Supervisor',
+            'Branch Supervisor/Sales Supervisor'
+        ];
         try {
 
             $BranchHeads = User::orderBy('firstName', 'asc')
-                ->where('position', 'Branch Manager')
+                ->whereIn('position', $branchHeads)
+                ->whereDoesntHave('branchHead')
                 ->get();
 
             return response()->json([
@@ -62,20 +70,54 @@ class BranchHeadController extends Controller
 
         $user = User::find($request->input('user_id'));
 
-        if ($user->position !== 'Branch Manager') {
+        $branchHeads = [
+            'Branch Manager',
+            'Branch Manager/Sales Manager',
+            'Branch Supervisor',
+            'Branch Supervisor/Sales Supervisor'
+        ];
+
+        if (!in_array($user->position, $branchHeads)) {
             return response()->json([
                 'message' => 'The selected user is not an Branch Head.',
             ], 400);
         }
 
-        $branchHeadOldBranchId = BranchHead::where('user_id', $user->id)->first();
+        $notExistsBranchId = [];
 
-        BranchHead::updateOrCreate([
-            'user_id' => $request->input('user_id'),
-        ], [
-            'branch_id' => $branchHeadOldBranchId ? [...$branchHeadOldBranchId->branch_id, ...$request->input('branch_id')] : $request->input('branch_id'),
-        ]);
+        foreach ($request->branch_id as $branchId) {
+            $exists = BranchHead::query()
+                ->whereJsonContains('branch_id', $branchId)
+                ->exists();
 
+            if ($exists) {
+                continue;
+            } else {
+                $notExistsBranchId[] = $branchId;
+            }
+        }
+
+
+        if (collect($notExistsBranchId)->isEmpty()) {
+            return response()->json([
+                'message' => 'Branch selected already exists.',
+            ], 400);
+        }
+
+        DB::transaction(function () use ($request, $user, $notExistsBranchId) {
+
+            $branchHeadOldBranchId = BranchHead::where('user_id', $user->id)->first();
+
+            BranchHead::updateOrCreate([
+                'user_id' => $request->input('user_id')
+            ], [
+                'branch_id' => $branchHeadOldBranchId ? [...$branchHeadOldBranchId->branch_id, ...$notExistsBranchId] : $notExistsBranchId
+            ]);
+
+            $user->update([
+                'role' => 'approver'
+            ]);
+        });
 
         return response()->json([
             'message' => 'Branch Head created successfully',
@@ -98,20 +140,49 @@ class BranchHeadController extends Controller
 
         if (!$BranchHead) {
             return response()->json([
-                'message' => 'Branch Head not found.',
+                'message' => 'Branch Head not found or the selected user is not an Branch Head.',
             ], 404);
         }
 
+        $notExistsBranchId = [];
+
         $user = User::find($request->input('user_id'));
 
-        if ($user->position !== 'Branch Manager') {
+        foreach ($request->branch_id as $branchId) {
+            $exists = BranchHead::query()
+                ->whereJsonContains('branch_id', $branchId)
+                ->exists();
+
+            if ($exists) {
+                continue;
+            } else {
+                $notExistsBranchId[] = $branchId;
+            }
+        }
+
+        $newBranchIds = [...array_diff($user->branchHead->branch_id, $request->removed_branch_id), ...$notExistsBranchId];
+
+        if (collect($newBranchIds)->isEmpty()) {
+            return response()->json([
+                'message' => 'Branch selected already exists.',
+            ], 400);
+        }
+
+        $branchHeads = [
+            'Branch Manager',
+            'Branch Manager/Sales Manager',
+            'Branch Supervisor',
+            'Branch Supervisor/Sales Supervisor'
+        ];
+
+        if (!in_array($user->position, $branchHeads)) {
             return response()->json([
                 'message' => 'The selected user is not an Branch Head.',
             ], 400);
         }
 
         $BranchHead->update([
-            'branch_id' => $request->input('branch_id'),
+            'branch_id' => $newBranchIds,
         ]);
 
         return response()->json([
