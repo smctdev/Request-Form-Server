@@ -236,6 +236,10 @@ class BranchHeadController extends Controller
 
             $user = BranchHead::findOrFail($id);
 
+            User::findOrFail($user->user_id)->update([
+                'role' => 'User'
+            ]);
+
             $user->delete();
 
             return response()->json([
