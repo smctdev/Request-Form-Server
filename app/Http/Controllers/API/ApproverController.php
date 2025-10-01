@@ -235,8 +235,6 @@ class ApproverController extends Controller
         $dsmtId = Branch::where('branch_code', 'DSMT')
             ->value('id');
 
-        \Log::info($dsmtId);
-
         // Return an error if an exception occurs
         try {
 
@@ -287,17 +285,26 @@ class ApproverController extends Controller
 
                 ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
 
+            $branchHeadsApprover = User::with('approverStaffs')->whereIn('id', function ($query) use ($requesterBranch) {
+
+                $query->select('user_id')
+
+                    ->from('branch_heads')
+
+                    ->whereJsonContains('branch_id', $requesterBranch);
+            })
+
+                ->whereDoesntHave('approverStaffs')
+
+                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
+
 
 
             return response()->json([
 
                 'message' => 'Approvers retrieved successfully',
 
-                'HOApprovers' => $HOapprovers,
-
-                'sameBranchApprovers' => $sameBranchApprovers,
-
-                'areaManagerApprover' => $areaManagerApprover
+                'data' => $HOapprovers->merge($sameBranchApprovers)->merge($areaManagerApprover)->merge($branchHeadsApprover),
 
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

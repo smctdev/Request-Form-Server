@@ -116,9 +116,9 @@ class User extends Authenticatable
         return $this->hasMany(ApprovedBy::class);
     }
 
-    public function branchHeads()
+    public function branchHead()
     {
-        return $this->hasMany(BranchHead::class);
+        return $this->hasOne(BranchHead::class);
     }
 
     public function requestAccess()
