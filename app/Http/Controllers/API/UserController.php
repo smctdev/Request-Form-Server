@@ -282,7 +282,7 @@ class UserController extends Controller
     {
         try {
 
-            $users = User::with('areaManagers', 'branch')->select('id', 'firstname', 'lastname', 'branch_code', 'email', 'username', 'role', 'position', 'contact', 'employee_id', 'branch', 'profile_picture', 'email_verified_at', DB::raw('IF(email_verified_at IS NULL, "Not Verified", "Verified") as verification_status'))->where('role', '!=', 'Admin')->get();
+            $users = User::with('areaManagers', 'branch')->select('id', 'firstname', 'lastname', 'branch_code', 'email', 'username', 'role', 'position', 'contact', 'employee_id', 'branch', 'profile_picture', 'email_verified_at', 'signature', DB::raw('IF(email_verified_at IS NULL, "Not Verified", "Verified") as verification_status'))->where('role', '!=', 'Admin')->get();
 
             return response()->json([
                 'message' => 'Users retrieved successfully',
@@ -415,7 +415,7 @@ class UserController extends Controller
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
-            $path = $file->store('request_form_profile_pictures', 'public');
+            $path = $file->store('request_form_profile_pictures', 'd_drive');
             $user->profile_picture = $path;
         }
 
@@ -443,7 +443,7 @@ class UserController extends Controller
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
-        // change all public into d_drive if using d_drive trunas
+        // change all public into public if using public trunas
         if ($request->hasFile('profile_picture')) {
             if ($user->profile_picture !== null) {
                 if (Storage::disk('d_drive')->exists($user->profile_picture)) {

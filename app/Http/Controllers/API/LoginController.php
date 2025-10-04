@@ -31,6 +31,10 @@ class LoginController extends Controller
             ]);
         }
 
+        if ($request->user()) {
+            abort(226, 'You are already logged in.');
+        }
+
         $user = User::where('email', $request->email)
             ->orWhere('userName', $request->email)->first();
 

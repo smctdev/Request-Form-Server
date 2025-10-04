@@ -4,7 +4,11 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Feedback;
+use App\Models\User;
+use App\Notifications\NotifyAllUsersNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -100,5 +104,29 @@ class FeedbackController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function notifyAllUserForFeedback(Request $request)
+    {
+        if (config('app.env') === 'local') {
+            ini_set('max_execution_time', 300);
+        }
+
+        $request->validate([
+            'title'     => ['required', 'min:2', 'max:20'],
+            'message'   => ['required', 'min:2', 'max:255']
+        ]);
+
+        $usersCount = User::query()
+            ->whereNot('id', Auth::id())
+            ->count();
+
+        User::whereNot('id', Auth::id())->chunk(100, function ($users) use ($request) {
+            Notification::send($users, new NotifyAllUsersNotification($request->message, Auth::user()->full_name, $request->title, 'feedback'));
+        });
+
+        return response()->json([
+            'message'       => "Notification sent {$usersCount} successfully",
+        ], 201);
     }
 }
