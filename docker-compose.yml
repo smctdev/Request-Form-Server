@@ -7,7 +7,7 @@ services:
     container_name: requestform-server
     restart: unless-stopped
     working_dir: /var/www/
-    # expose: 
+    # expose:
     #   - 8004 # expose the port
     volumes:
       - ./storage:/var/www/storage
@@ -25,7 +25,7 @@ services:
       DB_PORT: 3306
       DB_DATABASE: requestform
       DB_USERNAME: smct
-      DB_PASSWORD: smct 
+      DB_PASSWORD: smct
     # deploy:
     #   replicas: 3  # Set the desired number of replicas
 
@@ -62,6 +62,21 @@ services:
 
     networks:
       - requestform-server
+
+  queue-worker:
+    image: requestform-server
+    container_name: requestform-server-worker
+    working_dir: /var/www/
+    depends_on:
+      - requestform-server
+    command: php artisan queue:work
+    volumes:
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+      - ./:/var/www
+    networks:
+      - requestform-server
+    restart: unless-stopped
 
 networks:
   requestform-server:

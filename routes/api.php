@@ -42,6 +42,7 @@ Route::get('/positions', [PositionController::class, 'index']);
 Route::controller(FeedbackController::class)->group(function () {
     Route::get('/feedbacks', 'index');
     Route::post('/send-feedback', 'store');
+    Route::post('/send-notification', 'notifyAllUserForFeedback');
 });
 
 Route::get('/suppliers', [SupplierController::class, 'index']);
