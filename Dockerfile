@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -29,19 +29,28 @@ echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini
 # Set working directory
 WORKDIR /var/www
 
-# Install Composer (Laravel's dependency manager)
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copy Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy your Laravel project into the container
+# Copy application code
 COPY . /var/www
+COPY . .
 
-# Set file permissions (optional)
-RUN chown -R www-data:www-data /var/www
+# Build frontend assets
+RUN npm install && npm run build
 
-# Set up permissions for Laravel storage and cache directories
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+# Install PHP dependencies (prod only)
+RUN composer install --no-dev --optimize-autoloader
 
+# Set PHP upload limits
+RUN echo "upload_max_filesize=100M" > /usr/local/etc/php/conf.d/uploads.ini && \
+    echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini
+
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Expose port
 EXPOSE 8004
 
+# Start PHP-FPM
 CMD ["php-fpm"]
