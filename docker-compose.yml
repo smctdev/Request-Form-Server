@@ -13,6 +13,7 @@ services:
       - ./storage:/var/www/storage
       - ./bootstrap/cache:/var/www/bootstrap/cache
       - ./:/var/www
+      - /home/webserver/systems/Request-Form/Request-Form-Server/.env:/var/www/.env
       - ./docker-compose/nginx/default.conf:/etc/nginx/nginx.conf
       - /mnt/nvme0n1/requestUploads:/mnt/nvme0n1/requestUploads
       #- /mnt/nvme0n1/requestUploads:/var/www/storage/app/public
@@ -69,10 +70,11 @@ services:
     working_dir: /var/www/
     depends_on:
       - requestform-server
-    command: php artisan queue:work redis
+    command: php artisan queue:work redis --tries=3
     volumes:
       - ./storage:/var/www/storage
       - ./bootstrap/cache:/var/www/bootstrap/cache
+      - /home/webserver/systems/Request-Form/Request-Form-Server/.env:/var/www/.env
       - ./:/var/www
     networks:
       - requestform-server
