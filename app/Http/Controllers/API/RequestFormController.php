@@ -302,7 +302,6 @@ class RequestFormController extends Controller
                         DB::rollBack();
                         return response()->json([
                             'message' => 'File upload failed',
-                            'file' => $file
                         ], 500);
                     }
                     $filePaths[] = $filePath;
