@@ -7,11 +7,11 @@ RUN apk --no-cache add \
     libjpeg-turbo-dev \
     libwebp-dev \
     freetype-dev \
-    autoconf \
-    gcc \
-    g++ \
-    make \
-    libc-dev \
+    # autoconf \
+    # gcc \
+    # g++ \
+    # make \
+    # libc-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install gd pdo pdo_mysql \
     # && pecl install redis \
