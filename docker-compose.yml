@@ -66,23 +66,23 @@ services:
     networks:
       - requestform-server
 
-  queue-worker:
-    image: requestform-server
-    container_name: requestform-server-worker
-    working_dir: /var/www/
-    depends_on:
-      - requestform-server
-    command: php artisan queue:work redis
-    volumes:
-      - ./storage:/var/www/storage
-      - ./bootstrap/cache:/var/www/bootstrap/cache
-      - ./:/var/www
-    networks:
-      - requestform-server
-    restart: unless-stopped
-    environment:
-      REDIS_HOST: 172.17.0.1
-      REDIS_PORT: 6379
+#   queue-worker:
+#     image: requestform-server
+#     container_name: requestform-server-worker
+#     working_dir: /var/www/
+#     depends_on:
+#       - requestform-server
+#     command: php artisan queue:work redis
+#     volumes:
+#       - ./storage:/var/www/storage
+#       - ./bootstrap/cache:/var/www/bootstrap/cache
+#       - ./:/var/www
+#     networks:
+#       - requestform-server
+#     restart: unless-stopped
+#     environment:
+#       REDIS_HOST: 172.17.0.1
+#       REDIS_PORT: 6379
 
 #   redis:
 #     image: redis:alpine
