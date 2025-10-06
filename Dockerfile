@@ -13,7 +13,7 @@ RUN apk --no-cache add \
     # make \
     # libc-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd pdo pdo_mysql \
+    && docker-php-ext-install gd pdo pdo_mysql 
     # && pecl install redis \
     # && docker-php-ext-enable redis \
     # && apk del autoconf gcc g++ make libc-dev
