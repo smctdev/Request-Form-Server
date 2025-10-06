@@ -24,9 +24,9 @@ services:
       DB_DATABASE: requestform
       DB_USERNAME: smct
       DB_PASSWORD: smct
-      REDIS_HOST: 172.17.0.1
-      REDIS_PORT: 6379
-      REDIS_CLIENT: phpredis
+    #   REDIS_HOST: 172.17.0.1
+    #   REDIS_PORT: 6379
+    #   REDIS_CLIENT: phpredis
     # deploy:
     #   replicas: 3  # Set the desired number of replicas
 
@@ -64,24 +64,24 @@ services:
     networks:
       - requestform-server
 
-  queue-worker:
-    image: requestform-server
-    container_name: requestform-server-worker
-    working_dir: /var/www/
-    depends_on:
-      - requestform-server
-    command: php artisan queue:work redis
-    volumes:
-      - ./storage:/var/www/storage
-      - ./bootstrap/cache:/var/www/bootstrap/cache
-      - ./:/var/www
-    networks:
-      - requestform-server
-    restart: unless-stopped
-    environment:
-      REDIS_HOST: 172.17.0.1
-      REDIS_PORT: 6379
-      REDIS_CLIENT: phpredis
+#   queue-worker:
+#     image: requestform-server
+#     container_name: requestform-server-worker
+#     working_dir: /var/www/
+#     depends_on:
+#       - requestform-server
+#     command: php artisan queue:work redis
+#     volumes:
+#       - ./storage:/var/www/storage
+#       - ./bootstrap/cache:/var/www/bootstrap/cache
+#       - ./:/var/www
+#     networks:
+#       - requestform-server
+#     restart: unless-stopped
+#     environment:
+#       REDIS_HOST: 172.17.0.1
+#       REDIS_PORT: 6379
+#       REDIS_CLIENT: phpredis
 
 #   redis:
 #     image: redis:alpine
