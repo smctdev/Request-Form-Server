@@ -7,6 +7,7 @@ RUN apk --no-cache add \
     libjpeg-turbo-dev \
     libwebp-dev \
     freetype-dev \
+    redis \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install gd \
     && docker-php-ext-install pdo pdo_mysql
