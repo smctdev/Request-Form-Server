@@ -24,7 +24,7 @@ services:
       DB_DATABASE: requestform
       DB_USERNAME: smct
       DB_PASSWORD: smct
-    REDIS_HOST: 172.17.0.1
+      REDIS_HOST: 172.17.0.1
       REDIS_PORT: 6379
       REDIS_CLIENT: phpredis
     # deploy:
