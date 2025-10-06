@@ -26,6 +26,9 @@ services:
       DB_DATABASE: requestform
       DB_USERNAME: smct
       DB_PASSWORD: smct
+      REDIS_HOST: 172.17.0.1
+      REDIS_PORT: 6379
+    command: php artisan queue:work redis
     # deploy:
     #   replicas: 3  # Set the desired number of replicas
 
@@ -63,29 +66,29 @@ services:
     networks:
       - requestform-server
 
-  queue-worker:
-    image: requestform-server
-    container_name: requestform-server-worker
-    working_dir: /var/www/
-    depends_on:
-      - requestform-server
-    command: php artisan queue:work redis
-    volumes:
-      - ./storage:/var/www/storage
-      - ./bootstrap/cache:/var/www/bootstrap/cache
-      - ./:/var/www
-    networks:
-      - requestform-server
-    restart: unless-stopped
+#   queue-worker:
+#     image: requestform-server
+#     container_name: requestform-server-worker
+#     working_dir: /var/www/
+#     depends_on:
+#       - requestform-server
+#     command: php artisan queue:work redis
+#     volumes:
+#       - ./storage:/var/www/storage
+#       - ./bootstrap/cache:/var/www/bootstrap/cache
+#       - ./:/var/www
+#     networks:
+#       - requestform-server
+#     restart: unless-stopped
 
-  redis:
-    image: redis:alpine
-    container_name: requestform-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    networks:
-      - requestform-server
+#   redis:
+#     image: redis:alpine
+#     container_name: requestform-redis
+#     restart: unless-stopped
+#     ports:
+#       - "6379:6379"
+#     networks:
+#       - requestform-server
 
 
 networks:

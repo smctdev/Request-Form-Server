@@ -14,9 +14,9 @@ RUN apk --no-cache add \
     libc-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install gd pdo pdo_mysql \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apk del autoconf gcc g++ make libc-dev
+    # && pecl install redis \
+    # && docker-php-ext-enable redis \
+    # && apk del autoconf gcc g++ make libc-dev
 
 RUN echo "upload_max_filesize=100M" > /usr/local/etc/php/conf.d/uploads.ini && \
 echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini
