@@ -12,7 +12,8 @@ RUN apk --no-cache add \
     && docker-php-ext-install pdo pdo_mysql
 
 RUN echo "upload_max_filesize=100M" > /usr/local/etc/php/conf.d/uploads.ini && \
-echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini
+echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
+echo "extension=redis.so" > /usr/local/etc/php/php.ini
 # Set working directory
 WORKDIR /var/www
 
