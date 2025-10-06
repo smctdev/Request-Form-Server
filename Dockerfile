@@ -1,22 +1,28 @@
 FROM php:8.2-fpm-alpine
 
 # Install system dependencies
-RUN apk --no-cache add \
-    zlib-dev \
+RUN apt-get update && apt-get install -y \
+    build-essential \
     libpng-dev \
-    libjpeg-turbo-dev \
-    libwebp-dev \
-    freetype-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    npm \
+    libzip-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     autoconf \
-    gcc \
-    g++ \
-    make \
-    libc-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd pdo pdo_mysql \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apk del autoconf gcc g++ make libc-dev
+    pkg-config \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install pdo pdo_mysql zip gd
+
+# ✅ Install Redis extension
+RUN pecl install redis \
+    && docker-php-ext-enable redis
 
 # Set working directory
 WORKDIR /var/www
