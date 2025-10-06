@@ -2,6 +2,9 @@ FROM php:8.2-fpm-alpine
 
 # Install system dependencies
 RUN apk --no-cache add \
+    autoconf \
+    make \
+    g++ \
     zlib-dev \
     libpng-dev \
     libjpeg-turbo-dev \
