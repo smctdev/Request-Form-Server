@@ -1,5 +1,6 @@
 FROM php:8.2-fpm-alpine
 
+RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirror.sg.alpinelinux.org|g' /etc/apk/repositories
 # Install system dependencies
 RUN apk --no-cache add \
     autoconf \
