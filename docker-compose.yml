@@ -69,7 +69,7 @@ services:
     working_dir: /var/www/
     depends_on:
       - requestform-server
-    command: php artisan queue:work
+    command: php artisan queue:work redis
     volumes:
       - ./storage:/var/www/storage
       - ./bootstrap/cache:/var/www/bootstrap/cache
@@ -77,6 +77,16 @@ services:
     networks:
       - requestform-server
     restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: requestform-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - requestform-server
+
 
 networks:
   requestform-server:
