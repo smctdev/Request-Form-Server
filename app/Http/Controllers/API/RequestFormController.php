@@ -721,6 +721,7 @@ class RequestFormController extends Controller
                                 'comment' => $approval->comment ?? '',
                                 'position' => $user->position,
                                 'signature' => $user->signature,
+                                'user' => $user
                             ];
                         }
                     })->filter()->values()->all()
@@ -741,6 +742,7 @@ class RequestFormController extends Controller
                                 'comment' => $approval->comment ?? '',
                                 'position' => $user->position,
                                 'signature' => $user->signature,
+                                'user' => $user
                             ];
                         }
                     })->filter()->values()->all()
