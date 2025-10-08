@@ -113,7 +113,7 @@ class FeedbackController extends Controller
         }
 
         $request->validate([
-            'title'     => ['required', 'min:2', 'max:20'],
+            'title'     => ['required', 'min:2', 'max:50'],
             'message'   => ['required', 'min:2', 'max:255']
         ]);
 
