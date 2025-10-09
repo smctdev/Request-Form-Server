@@ -311,7 +311,7 @@ class UserController extends Controller
             Storage::disk('d_drive')->delete($signature);
         }
 
-        $filename = Str::random(8) . '.' . $signature->getClientOriginalExtension();
+        $filename = $user->userName . Str::random(8) . '.' . $signature->getClientOriginalExtension();
 
         $path = $signature->storeAs('signature', $filename, 'd_drive');
 
@@ -660,13 +660,15 @@ class UserController extends Controller
 
     public function updateMySignature(Request $request)
     {
+        $user = Auth::user();
+
         $signature = $request->signature;
 
         if (Storage::disk('d_drive')->exists($signature)) {
             Storage::disk('d_drive')->delete($signature);
         }
 
-        $filename = Str::random(8) . '.' . $signature->getClientOriginalExtension();
+        $filename = $user->userName . Str::random(8) . '.' . $signature->getClientOriginalExtension();
 
         $path = $signature->storeAs('signature', $filename, 'd_drive');
 
