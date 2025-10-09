@@ -694,7 +694,7 @@ class RequestFormController extends Controller
 
                 // Fetch all approvers in one query
                 $allApprovers = User::whereIn('id', $allApproversIds)
-                    ->select('id', 'firstName', 'lastName', 'position', 'signature', 'branch')
+                    ->select('id', 'firstName', 'lastName', 'position', 'signature', 'branch', 'profile_picture')
                     ->get()
                     ->keyBy('id');
 
