@@ -114,7 +114,7 @@ class FeedbackController extends Controller
 
         $request->validate([
             'title'     => ['required', 'min:2', 'max:50'],
-            'message'   => ['required', 'min:2', 'max:255']
+            'message'   => ['required', 'min:2', 'max:500']
         ]);
 
         $usersCount = User::query()
