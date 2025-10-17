@@ -282,7 +282,7 @@ class UserController extends Controller
     {
         try {
 
-            $users = User::with('areaManagers', 'branch')->select('id', 'firstname', 'lastname', 'branch_code', 'email', 'username', 'role', 'position', 'contact', 'employee_id', 'branch', 'profile_picture', 'email_verified_at', 'signature', DB::raw('IF(email_verified_at IS NULL, "Not Verified", "Verified") as verification_status'))->where('role', '!=', 'Admin')->get();
+            $users = User::with('areaManagers', 'branch')->select('id', 'firstname', 'lastname', 'branch_code', 'email', 'username', 'role', 'position', 'contact', 'employee_id', 'branch', 'profile_picture', 'email_verified_at', 'signature', 'is_cbm_staff', DB::raw('IF(email_verified_at IS NULL, "Not Verified", "Verified") as verification_status'))->where('role', '!=', 'Admin')->get();
 
             return response()->json([
                 'message' => 'Users retrieved successfully',
@@ -385,7 +385,7 @@ class UserController extends Controller
     } */
     public function updateProfile(Request $request, $id)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'firstName' => 'required|string',
             'lastName' => 'required|string',
             'email' => 'required|email',
@@ -396,6 +396,7 @@ class UserController extends Controller
             'branch_code' => 'nullable|string',
             'branch' => 'nullable|string',
             'profile_picture' => 'nullable|image', // Ensure this validation rule is correct
+            'is_cbm_staff' => ['nullable']
         ]);
 
         $user = User::find($id);
@@ -412,6 +413,7 @@ class UserController extends Controller
         $user->role = $request->input('role');
         $user->branch_code = $request->input('branch_code');
         $user->branch = $request->input('branch');
+        $user->is_cbm_staff = $request->is_cbm_staff;
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');

@@ -39,6 +39,7 @@ class RequestFormController extends Controller
         // }
         // Check if the user is an AVPFinance
         $user = DB::table('users')->where('id', $userId)->first();
+        $is_cbm_staff = User::where('is_cbm_staff', true)->first();
         if ($user && $user->position === 'AVP - Finance') {
             $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
 
@@ -60,6 +61,18 @@ class RequestFormController extends Controller
                 ];
                 $level++;
             }
+        }
+
+        if ($user->position === "Compensation and Benefits Manager") {
+            $approvalProcesses[] = [
+                'user_id' => $is_cbm_staff->id,
+                'request_form_id' => $requestFormData->id,
+                'level' => $level,
+                'status' => 'Pending',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            $level++;
         }
 
         // Add the AVPFinance user to the approval process
