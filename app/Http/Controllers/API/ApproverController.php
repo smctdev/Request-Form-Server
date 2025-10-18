@@ -251,7 +251,9 @@ class ApproverController extends Controller
 
                 ->where('role', 'approver')
 
-                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
+                ->where('is_cbm_staff', false)
+
+                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff')
 
                 ->get();
 
