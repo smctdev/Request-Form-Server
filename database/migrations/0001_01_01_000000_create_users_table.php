@@ -26,9 +26,10 @@ return new class extends Migration
             $table->string('position');
             $table->longText('signature')->nullable();
             $table->rememberToken();
-            $table->timestamps();
             $table->string('role');
             $table->string('profile_picture')->nullable();
+            $table->boolean('is_cbm_staff')->default(false);
+            $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
