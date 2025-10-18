@@ -400,8 +400,20 @@ class UserController extends Controller
         ]);
 
         $user = User::find($id);
+
+        $isExistsCbmStaff = User::query()
+            ->where('is_cbm_staff', true)
+            ->whereNot('id', $id)
+            ->exists();
+
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($isExistsCbmStaff) {
+            return response()->json([
+                'message' => 'There is already a Cbm Staff'
+            ], 400);
         }
 
         $user->firstName = $request->input('firstName');
@@ -414,6 +426,10 @@ class UserController extends Controller
         $user->branch_code = $request->input('branch_code');
         $user->branch = $request->input('branch');
         $user->is_cbm_staff = $request->is_cbm_staff;
+
+        if ($user->position !== 'approver' && $request->is_cbm_staff) {
+            $user->role = 'approver';
+        }
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
