@@ -237,24 +237,16 @@ class ApproverController extends Controller
 
         // Return an error if an exception occurs
         try {
-
-
             // Fetch the ID for the 'HO' branch
 
             $HObranchID = Branch::where('branch_code', 'HO')->value('id');
 
-
             // Fetch approvers based on the branch ID
-
             $HOapprovers = User::with('approverStaffs')->where('branch_code', $HObranchID)
                 ->whereDoesntHave('approverStaffs')
-
                 ->where('role', 'approver')
-
                 ->where('is_cbm_staff', false)
-
                 ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff')
-
                 ->get();
 
             // Find the requester by userId
@@ -263,43 +255,34 @@ class ApproverController extends Controller
 
             $requesterBranch = (int) $requester->branch_code;
 
-
             $sameBranchApprovers = User::with('approverStaffs')
                 ->whereIn('branch_code', [$requesterBranch, $dsmtId])
                 ->whereDoesntHave('approverStaffs')
                 ->where('role', 'approver')
                 ->doesntHave('approverStaffs')
                 ->where('position', '!=', 'Area Manager')
-                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
+                ->where('is_cbm_staff', false)
+                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff')
                 ->get();
 
 
             $areaManagerApprover = User::with('approverStaffs')->whereIn('id', function ($query) use ($requesterBranch) {
-
                 $query->select('user_id')
-
                     ->from('area_managers')
-
                     ->whereJsonContains('branch_id', $requesterBranch);
             })
-
                 ->whereDoesntHave('approverStaffs')
-
-                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
+                ->where('is_cbm_staff', false)
+                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff']);
 
             $branchHeadsApprover = User::with('approverStaffs')->whereIn('id', function ($query) use ($requesterBranch) {
-
                 $query->select('user_id')
-
                     ->from('branch_heads')
-
                     ->whereJsonContains('branch_id', $requesterBranch);
             })
-
                 ->whereDoesntHave('approverStaffs')
-
-                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
-
+                ->where('is_cbm_staff', false)
+                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff']);
 
 
             return response()->json([
