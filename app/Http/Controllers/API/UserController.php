@@ -410,7 +410,7 @@ class UserController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        if ($isExistsCbmStaff) {
+        if ($isExistsCbmStaff && $request->is_cbm_staff) {
             return response()->json([
                 'message' => 'There is already a Cbm Staff'
             ], 400);
