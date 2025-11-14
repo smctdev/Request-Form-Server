@@ -62,12 +62,12 @@ return [
             'visibility' => 'private',  // Optional: use 'private' if needed
             'permissions' => [
                 'file' => [
-                    'public' => 0755,
-                    'private' => 0700,
+                    'public' => 0777,
+                    'private' => 0666,
                 ],
                 'dir' => [
-                    'public' => 0755,
-                    'private' => 0700,
+                    'public' => 0777,
+                    'private' => 0777,
                 ],
             ],
         ],
