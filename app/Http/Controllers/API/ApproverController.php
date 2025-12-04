@@ -242,7 +242,7 @@ class ApproverController extends Controller
             $HObranchID = Branch::where('branch_code', 'HO')->value('id');
 
             // Fetch approvers based on the branch ID
-            $HOapprovers = User::with('approverStaffs', 'checkers')->where('branch_code', $HObranchID)
+            $HOapprovers = User::with('approverStaffs')->where('branch_code', $HObranchID)
                 ->whereDoesntHave('approverStaffs')
                 ->whereDoesntHave('checkers')
                 ->where('role', 'approver')
