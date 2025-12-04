@@ -245,8 +245,7 @@ class ApproverController extends Controller
             $HOapprovers = User::with('approverStaffs')->where('branch_code', $HObranchID)
                 ->whereDoesntHave('approverStaffs')
                 ->where('role', 'approver')
-                ->where('is_cbm_staff', false)
-                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff')
+                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
                 ->get();
 
             // Find the requester by userId
@@ -261,8 +260,7 @@ class ApproverController extends Controller
                 ->where('role', 'approver')
                 ->doesntHave('approverStaffs')
                 ->where('position', '!=', 'Area Manager')
-                ->where('is_cbm_staff', false)
-                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff')
+                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
                 ->get();
 
 
@@ -272,8 +270,7 @@ class ApproverController extends Controller
                     ->whereJsonContains('branch_id', $requesterBranch);
             })
                 ->whereDoesntHave('approverStaffs')
-                ->where('is_cbm_staff', false)
-                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff']);
+                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
 
             $branchHeadsApprover = User::with('approverStaffs')->whereIn('id', function ($query) use ($requesterBranch) {
                 $query->select('user_id')
@@ -281,8 +278,7 @@ class ApproverController extends Controller
                     ->whereJsonContains('branch_id', $requesterBranch);
             })
                 ->whereDoesntHave('approverStaffs')
-                ->where('is_cbm_staff', false)
-                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code', 'is_cbm_staff']);
+                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
 
 
             return response()->json([

@@ -122,7 +122,7 @@ class FeedbackController extends Controller
             ->count();
 
         User::whereNot('id', Auth::id())->chunk(100, function ($users) use ($request) {
-            Notification::send($users, new NotifyAllUsersNotification($request->message, Auth::user()->full_name, $request->title, 'feedback'));
+            Notification::send($users, new NotifyAllUsersNotification($request->message, Auth::user()->fullName, $request->title, 'feedback'));
         });
 
         return response()->json([

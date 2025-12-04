@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Notifications\ApprovalProcessNotification;
 use App\Events\NotificationEvent;
+use App\Models\ApproverChecker;
 use App\Models\AVPFinanceStaff;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,7 @@ use Illuminate\Support\Collection;
 
 class RequestFormController extends Controller
 {
-    private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId)
+    private function handleAvpFinanceApproval($userId, &$approvalProcesses, &$level, $requestFormData, $branchId, $request)
     {
         // if (!$requestFormData) {
         //     Log::error("Invalid RequestForm data passed to handleAvpFinanceApproval.");
@@ -39,11 +40,41 @@ class RequestFormController extends Controller
         // }
         // Check if the user is an AVPFinance
         $user = DB::table('users')->where('id', $userId)->first();
-        $is_cbm_staff = User::where('is_cbm_staff', true)->first();
+
+        $approverChecker = ApproverChecker::query()
+            ->where('checker_category', $request->kind_of_request)
+            ->first();
+
         if ($user && $user->position === 'AVP - Finance') {
             $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
 
-            if ($avpFinanceRecords->isNotEmpty()) {
+            if ($approverChecker?->exists()) {
+
+                if ($approverChecker?->checker_id) {
+                    $approvalProcesses[] = [
+                        'user_id' => $approverChecker?->checker_id,
+                        'request_form_id' => $requestFormData->id,
+                        'level' => $level,
+                        'status' => 'Pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                    $level++;
+                }
+                $approvalProcesses[] = [
+                    'user_id' => $approverChecker->user_id,
+                    'request_form_id' => $requestFormData->id,
+                    'level' => $level,
+                    'status' => 'Pending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $level++;
+
+                if (!in_array($approverChecker->user_id, $requestFormData->approved_by) && !in_array($approverChecker->user_id, $requestFormData?->noted_by ?? [])) {
+                    $requestFormData->update(['approved_by' => array_merge([$approverChecker->user_id], $requestFormData->approved_by)]);
+                }
+            } elseif ($avpFinanceRecords->isNotEmpty()) {
                 $avpStaffs = $avpFinanceRecords->pluck('staff_id');
 
                 $staff = AVPFinanceStaff::query()
@@ -61,18 +92,18 @@ class RequestFormController extends Controller
                 ];
                 $level++;
             }
-        }
-
-        if ($user->position === "Compensation and Benefits Manager") {
-            $approvalProcesses[] = [
-                'user_id' => $is_cbm_staff->id,
-                'request_form_id' => $requestFormData->id,
-                'level' => $level,
-                'status' => 'Pending',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-            $level++;
+        } else {
+            if ($approverChecker?->checker_id) {
+                $approvalProcesses[] = [
+                    'user_id' => $approverChecker?->checker_id,
+                    'request_form_id' => $requestFormData->id,
+                    'level' => $level,
+                    'status' => 'Pending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $level++;
+            }
         }
 
         // Add the AVPFinance user to the approval process
@@ -358,12 +389,24 @@ class RequestFormController extends Controller
             foreach ($approvers as $approverGroup) {
                 foreach ($approverGroup['ids'] as $approverId) {
                     // Use the helper function to handle AVPFinance and their staff
-                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $requestFormData, $branchCode);
+                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $requestFormData, $branchCode, $request);
                 }
             }
 
+            $items = collect($approvalProcesses)
+                ->reverse()
+                ->unique('user_id')
+                ->reverse()
+                ->values()
+                ->map(
+                    fn($item, $index)
+                    =>
+                    array_merge($item, ['level' => $index + 1])
+                )
+                ->all();
+
             // Insert all approval processes into the database
-            ApprovalProcess::insert($approvalProcesses);
+            ApprovalProcess::insert($items);
 
             // Notify the first approver (user 3 in this case)
             $firstApproverId = $notedByIds !== null ? $notedByIds[0] : $approvedByIds[0];
@@ -539,7 +582,7 @@ class RequestFormController extends Controller
             foreach ($approvers as $approverGroup) {
                 foreach ($approverGroup['ids'] as $approverId) {
                     // Use the helper function to handle AVPFinance and their staff
-                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $request_data, $user->branch_code);
+                    $this->handleAvpFinanceApproval($approverId, $approvalProcesses, $level, $request_data, $user->branch_code, $request);
                 }
             }
 

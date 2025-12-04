@@ -28,7 +28,6 @@ return new class extends Migration
             $table->rememberToken();
             $table->string('role');
             $table->string('profile_picture')->nullable();
-            $table->boolean('is_cbm_staff')->default(false);
             $table->timestamps();
         });
 
