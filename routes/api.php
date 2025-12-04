@@ -17,6 +17,7 @@ use App\Http\Controllers\API\CustomApproversController;
 use App\Http\Controllers\API\ApproverController;
 use App\Http\Controllers\API\AreaManagerController;
 use App\Http\Controllers\API\ApprovalProcessController;
+use App\Http\Controllers\API\ApproverCheckerController;
 use App\Http\Controllers\API\AttachmentController;
 use App\Http\Controllers\API\BankController;
 use App\Http\Controllers\API\FeedbackController;
@@ -171,4 +172,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/update-signature', [UserController::class, 'updateMySignature']);
     Route::get('/request-reports', [RequestFormController::class, 'requestReports']);
+
+    Route::apiResource('approver-checkers', ApproverCheckerController::class);
+
+    Route::get('approver-checkers-select', [ApproverCheckerController::class, 'approverCheckers']);
 });

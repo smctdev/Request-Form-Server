@@ -31,6 +31,7 @@ class User extends Authenticatable
 
     protected $appends = [
         'fullName',
+        'is_admin'
     ];
 
     /**
@@ -43,7 +44,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_cbm_staff' => 'boolean'
         ];
     }
 
@@ -128,6 +128,56 @@ class User extends Authenticatable
             ->latest();
     }
 
+    public function approverCheckers()
+    {
+        return $this->hasMany(ApproverChecker::class);
+    }
+
+    public function checkers()
+    {
+        return $this->hasMany(ApproverChecker::class, 'checker_id');
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return $this->role === 'Admin';
+    }
+
+    public function scopeSearch($query, $term)
+    {
+        $term = "%{$term}%";
+
+        $query->when(
+            $term,
+            fn()
+            =>
+            $query->where(
+                fn()
+                =>
+                $query->whereAny([
+                    'firstName',
+                    'lastName',
+                    'email',
+                    'contact',
+                    'branch',
+                    'userName',
+                    'employee_id',
+                    'position',
+                    'role'
+                ], 'like', $term)
+                    ->orWhereRelation(
+                        'branch',
+                        fn($branch)
+                        =>
+                        $branch->where('branch_name', 'like', $term)
+                            ->orWhere('branch_code', 'like', $term)
+                            ->orWhere('branch', 'like', $term)
+                            ->orWhere('acronym', 'like', $term)
+                    )
+            )
+        );
+    }
+
     /**
      * The default values for attributes.
      *
@@ -136,8 +186,8 @@ class User extends Authenticatable
 
 
     /**
-     * The primary key for the model.
-     *
-     * @var string
-     */
+ * The primary key for the model.
+ *
+ * @var string
+ */
 }
