@@ -93,7 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post("create-approvers", [CustomApproversController::class, "createApprovers"])->name('create.approvers');
-    Route::get('/view-approvers/{userID}', [ApproverController::class, 'getApprovers'])->name('get.approvers.with.same.branch.and.all.HO');
+    Route::get('/view-approvers-back/{userID}', [ApproverController::class, 'getApprovers'])->name('get.approvers.with.same.branch.and.all.HO');
+    Route::get('/view-approvers/{userID}', [ApproverController::class, 'getApproversData']);
     Route::get('/approvers/{id}', [ApproverController::class, 'show']);
 
     Route::get('/view-approvers', [ApproverController::class, 'index']);
