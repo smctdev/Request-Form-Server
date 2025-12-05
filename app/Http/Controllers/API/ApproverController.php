@@ -246,7 +246,7 @@ class ApproverController extends Controller
                 ->whereDoesntHave('approverStaffs')
                 ->whereDoesntHave('checkers')
                 ->where('role', 'approver')
-                ->select('id', 'firstName', 'lastName')
+                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
                 ->get();
 
             // Find the requester by userId
@@ -309,6 +309,88 @@ class ApproverController extends Controller
             ], 500);
         }
     }
+
+    public function getApproversData($userId)
+    {
+
+        $dsmtId = Branch::where('branch_code', 'DSMT')
+            ->value('id');
+
+        // Return an error if an exception occurs
+        try {
+            // Fetch the ID for the 'HO' branch
+
+            $HObranchID = Branch::where('branch_code', 'HO')->value('id');
+
+            // Fetch approvers based on the branch ID
+            $HOapprovers = User::with('approverStaffs')->where('branch_code', $HObranchID)
+                ->whereDoesntHave('approverStaffs')
+                ->whereDoesntHave('checkers')
+                ->where('role', 'approver')
+                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
+                ->get();
+
+            // Find the requester by userId
+
+            $requester = User::findOrFail($userId);
+
+            $requesterBranch = (int) $requester->branch_code;
+
+            $sameBranchApprovers = User::with('approverStaffs')
+                ->whereIn('branch_code', [$requesterBranch, $dsmtId])
+                ->whereDoesntHave('approverStaffs')
+                ->where('role', 'approver')
+                ->doesntHave('approverStaffs')
+                ->where('position', '!=', 'Area Manager')
+                ->select('id', 'firstName', 'lastName', 'role', 'position', 'branch_code')
+                ->get();
+
+
+            $areaManagerApprover = User::with('approverStaffs')->whereIn('id', function ($query) use ($requesterBranch) {
+                $query->select('user_id')
+                    ->from('area_managers')
+                    ->whereJsonContains('branch_id', $requesterBranch);
+            })
+                ->whereDoesntHave('approverStaffs')
+                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
+
+            $branchHeadsApprover = User::with('approverStaffs')->whereIn('id', function ($query) use ($requesterBranch) {
+                $query->select('user_id')
+                    ->from('branch_heads')
+                    ->whereJsonContains('branch_id', $requesterBranch);
+            })
+                ->whereDoesntHave('approverStaffs')
+                ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
+
+
+            return response()->json([
+
+                'message' => 'Approvers retrieved successfully',
+
+                'data' => $HOapprovers->merge($sameBranchApprovers)->merge($areaManagerApprover)->merge($branchHeadsApprover),
+
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+
+            return response()->json([
+
+                'message' => 'User not found',
+
+                'error' => $e->getMessage(),
+
+            ], 404);
+        } catch (\Exception $e) {
+
+            return response()->json([
+
+                'message' => 'An error occurred while retrieving approvers',
+
+                'error' => $e->getMessage(),
+
+            ], 500);
+        }
+    }
+
     /**
      * Display the specified approver.
      *
