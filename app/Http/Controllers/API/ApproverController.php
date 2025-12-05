@@ -339,6 +339,7 @@ class ApproverController extends Controller
             $sameBranchApprovers = User::with('approverStaffs')
                 ->whereIn('branch_code', [$requesterBranch, $dsmtId])
                 ->whereDoesntHave('approverStaffs')
+                ->whereDoesntHave('checkers')
                 ->where('role', 'approver')
                 ->doesntHave('approverStaffs')
                 ->where('position', '!=', 'Area Manager')
@@ -360,6 +361,7 @@ class ApproverController extends Controller
                     ->whereJsonContains('branch_id', $requesterBranch);
             })
                 ->whereDoesntHave('approverStaffs')
+                ->whereDoesntHave('checkers')
                 ->get(['id', 'firstName', 'lastName', 'role', 'position', 'branch_code']);
 
 
