@@ -93,7 +93,9 @@ class RequestFormController extends Controller
                 $level++;
             }
         } else {
-            if ($approverChecker?->checker_id) {
+            $approverCheckerUserId = $approverChecker?->user_id === $userId;
+
+            if ($approverChecker?->checker_id && $approverCheckerUserId) {
                 $approvalProcesses[] = [
                     'user_id' => $approverChecker?->checker_id,
                     'request_form_id' => $requestFormData->id,
