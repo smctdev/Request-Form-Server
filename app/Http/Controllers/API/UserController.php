@@ -619,33 +619,31 @@ class UserController extends Controller
                 ->orWhere('username', $file[5])
                 ->exists();
 
-            if ($exists) {
-                continue;
+            if (!$exists) {
+                $email = $file[7] === 'temp_email' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) . '@email.com' : $file[7];
+
+                $username = $file[5] === 'temp_username' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) : $file[5];
+
+                $users[] = [
+                    'firstName'         => Str::title($file[0]),
+                    'lastName'          => Str::title($file[1]),
+                    'contact'           => $file[2] ?: '09123456789',
+                    'branch_code'       => !$branch ? null : $branch->id,
+                    'branch'            => !$branch ? null : $branch->branch,
+                    'userName'          => $username,
+                    'employee_id'       => $file[6],
+                    'email'             => $email,
+                    'position'          => $position->value,
+                    'role'              => 'User',
+                    'email_verified_at' => now(),
+                    'password'          => $password,
+                    'signature'         => null,
+                    'profile_picture'   => null,
+                    'remember_token'    => null,
+                    'created_at'        => now(),
+                    'updated_at'        => now(),
+                ];
             }
-
-            $email = $file[7] === 'temp_email' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) . '@email.com' : $file[7];
-
-            $username = $file[5] === 'temp_username' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) : $file[5];
-
-            $users[] = [
-                'firstName'         => Str::title($file[0]),
-                'lastName'          => Str::title($file[1]),
-                'contact'           => $file[2] ?: '09123456789',
-                'branch_code'       => !$branch ? null : $branch->id,
-                'branch'            => !$branch ? null : $branch->branch,
-                'userName'          => $username,
-                'employee_id'       => $file[6],
-                'email'             => $email,
-                'position'          => $position->value,
-                'role'              => 'User',
-                'email_verified_at' => now(),
-                'password'          => $password,
-                'signature'         => null,
-                'profile_picture'   => null,
-                'remember_token'    => null,
-                'created_at'        => now(),
-                'updated_at'        => now(),
-            ];
         }
 
         if (!empty($users)) {
