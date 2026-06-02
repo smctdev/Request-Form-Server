@@ -58,7 +58,7 @@ class ApprovalProcessController extends Controller
             $attachmentPaths = []; // Initialize as an array if files exist
             foreach ($request->file('attachment') as $file) {
                 // Store each file and collect paths
-                $path = $file->store('request_form_comment_attachments', 'd_drive');
+                $path = $file->store('request_form_comment_attachments', config('app.storage_disk'));
                 $attachmentPaths[] = $path;
             }
         }

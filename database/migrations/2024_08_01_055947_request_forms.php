@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('branch_code');
             $table->string('request_code');
             $table->string('completed_code')->nullable();
+            $table->string('kind_of_request')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
@@ -36,8 +37,5 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-
-    }
+    public function down(): void {}
 };

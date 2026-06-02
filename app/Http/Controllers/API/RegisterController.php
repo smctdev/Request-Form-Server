@@ -51,12 +51,12 @@ class RegisterController extends Controller
                 return response()->json(['error' => 'Unable to save the signature file'], 500);
             } */
             $signature = $request->signature;
-            $path = $signature->storeAs('signature', $signature->getClientOriginalName(), 'd_drive');
+            $path = $signature->storeAs('signature', $signature->getClientOriginalName(), config('app.storage_disk'));
 
             $user = $request->user();
 
-            if (Storage::disk('d_drive')->exists($signature)) {
-                Storage::disk('d_drive')->delete($signature);
+            if (Storage::disk(config('app.storage_disk'))->exists($signature)) {
+                Storage::disk(config('app.storage_disk'))->delete($signature);
             }
             $user = User::create([
                 "firstName" => $request->firstName,

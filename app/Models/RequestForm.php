@@ -21,7 +21,8 @@ class RequestForm extends Model
         'request_code',
         'currency',
         'status',
-        'completed_code'
+        'completed_code',
+        'kind_of_request'
     ];
 
     protected $attributes = [

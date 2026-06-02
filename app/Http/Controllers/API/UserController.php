@@ -307,13 +307,13 @@ class UserController extends Controller
         // Get the base64 string from the request
         $signature = $request->signature;
 
-        if (Storage::disk('d_drive')->exists($signature)) {
-            Storage::disk('d_drive')->delete($signature);
+        if (Storage::disk(config('app.storage_disk'))->exists($signature)) {
+            Storage::disk(config('app.storage_disk'))->delete($signature);
         }
 
         $filename = $user->userName . Str::random(8) . '.' . $signature->getClientOriginalExtension();
 
-        $path = $signature->storeAs('signature', $filename, 'd_drive');
+        $path = $signature->storeAs('signature', $filename, config('app.storage_disk'));
 
         $user = $request->user();
 
@@ -348,7 +348,7 @@ class UserController extends Controller
             // Save the profile picture if provided
             if ($request->hasFile('profile_picture')) {
                 $profilePicture = $request->file('profile_picture');
-                $profilePicturePath = $profilePicture->store('request_form_profile_pictures, 'd_drive');
+                $profilePicturePath = $profilePicture->store('request_form_profile_pictures, config('app.storage_disk'));
                 $user->profile_picture = $profilePicturePath; // Save only the path
             }
 
@@ -416,7 +416,7 @@ class UserController extends Controller
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
-            $path = $file->store('request_form_profile_pictures', 'd_drive');
+            $path = $file->store('request_form_profile_pictures', config('app.storage_disk'));
             $user->profile_picture = $path;
         }
 
@@ -447,13 +447,13 @@ class UserController extends Controller
         // change all public into public if using public trunas
         if ($request->hasFile('profile_picture')) {
             if ($user->profile_picture !== null) {
-                if (Storage::disk('d_drive')->exists($user->profile_picture)) {
-                    Storage::disk('d_drive')->delete($user->profile_picture);
+                if (Storage::disk(config('app.storage_disk'))->exists($user->profile_picture)) {
+                    Storage::disk(config('app.storage_disk'))->delete($user->profile_picture);
                 }
             }
 
             $file = $request->file('profile_picture');
-            $path = $file->store('request_form_profile_pictures', 'd_drive');
+            $path = $file->store('request_form_profile_pictures', config('app.storage_disk'));
             $user->profile_picture = $path;
         }
 
@@ -619,33 +619,31 @@ class UserController extends Controller
                 ->orWhere('username', $file[5])
                 ->exists();
 
-            if ($exists) {
-                continue;
+            if (!$exists) {
+                $email = $file[7] === 'temp_email' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) . '@email.com' : $file[7];
+
+                $username = $file[5] === 'temp_username' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) : $file[5];
+
+                $users[] = [
+                    'firstName'         => Str::title($file[0]),
+                    'lastName'          => Str::title($file[1]),
+                    'contact'           => $file[2] ?: '09123456789',
+                    'branch_code'       => !$branch ? null : $branch->id,
+                    'branch'            => !$branch ? null : $branch->branch,
+                    'userName'          => $username,
+                    'employee_id'       => $file[6],
+                    'email'             => $email,
+                    'position'          => $position->value,
+                    'role'              => 'User',
+                    'email_verified_at' => now(),
+                    'password'          => $password,
+                    'signature'         => null,
+                    'profile_picture'   => null,
+                    'remember_token'    => null,
+                    'created_at'        => now(),
+                    'updated_at'        => now(),
+                ];
             }
-
-            $email = $file[7] === 'temp_email' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) . '@email.com' : $file[7];
-
-            $username = $file[5] === 'temp_username' ? Str::lower(Str::replace(' ', '_', Str::trim($file[0]))) . '_' . Str::lower(Str::replace(' ', '_', Str::trim($file[1]))) : $file[5];
-
-            $users[] = [
-                'firstName'         => Str::title($file[0]),
-                'lastName'          => Str::title($file[1]),
-                'contact'           => $file[2] ?: '09123456789',
-                'branch_code'       => !$branch ? null : $branch->id,
-                'branch'            => !$branch ? null : $branch->branch,
-                'userName'          => $username,
-                'employee_id'       => $file[6],
-                'email'             => $email,
-                'position'          => $position->value,
-                'role'              => 'User',
-                'email_verified_at' => now(),
-                'password'          => $password,
-                'signature'         => null,
-                'profile_picture'   => null,
-                'remember_token'    => null,
-                'created_at'        => now(),
-                'updated_at'        => now(),
-            ];
         }
 
         if (!empty($users)) {
@@ -665,13 +663,13 @@ class UserController extends Controller
 
         $signature = $request->signature;
 
-        if (Storage::disk('d_drive')->exists($signature)) {
-            Storage::disk('d_drive')->delete($signature);
+        if (Storage::disk(config('app.storage_disk'))->exists($signature)) {
+            Storage::disk(config('app.storage_disk'))->delete($signature);
         }
 
         $filename = $user->userName . Str::random(8) . '.' . $signature->getClientOriginalExtension();
 
-        $path = $signature->storeAs('signature', $filename, 'd_drive');
+        $path = $signature->storeAs('signature', $filename, config('app.storage_disk'));
 
         $user = $request->user();
 
