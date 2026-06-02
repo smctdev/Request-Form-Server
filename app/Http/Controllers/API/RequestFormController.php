@@ -41,40 +41,41 @@ class RequestFormController extends Controller
         // Check if the user is an AVPFinance
         $user = DB::table('users')->where('id', $userId)->first();
 
-        $approverChecker = ApproverChecker::query()
-            ->where('checker_category', $request->kind_of_request)
-            ->first();
+        // $approverChecker = ApproverChecker::query()
+        //     ->where('checker_category', $request->kind_of_request)
+        //     ->first();
 
         if ($user && $user->position === 'AVP - Finance') {
             $avpFinanceRecords = DB::table('a_v_p_finance_staff')->where('user_id', $userId)->get();
 
-            if ($approverChecker?->exists()) {
+            // if ($approverChecker?->exists()) {
 
-                if ($approverChecker?->checker_id) {
-                    $approvalProcesses[] = [
-                        'user_id' => $approverChecker?->checker_id,
-                        'request_form_id' => $requestFormData->id,
-                        'level' => $level,
-                        'status' => 'Pending',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                    $level++;
-                }
-                $approvalProcesses[] = [
-                    'user_id' => $approverChecker->user_id,
-                    'request_form_id' => $requestFormData->id,
-                    'level' => $level,
-                    'status' => 'Pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $level++;
+            //     if ($approverChecker?->checker_id) {
+            //         $approvalProcesses[] = [
+            //             'user_id' => $approverChecker?->checker_id,
+            //             'request_form_id' => $requestFormData->id,
+            //             'level' => $level,
+            //             'status' => 'Pending',
+            //             'created_at' => now(),
+            //             'updated_at' => now(),
+            //         ];
+            //         $level++;
+            //     }
+            //     $approvalProcesses[] = [
+            //         'user_id' => $approverChecker->user_id,
+            //         'request_form_id' => $requestFormData->id,
+            //         'level' => $level,
+            //         'status' => 'Pending',
+            //         'created_at' => now(),
+            //         'updated_at' => now(),
+            //     ];
+            //     $level++;
 
-                if (!in_array($approverChecker->user_id, $requestFormData->approved_by) && !in_array($approverChecker->user_id, $requestFormData?->noted_by ?? [])) {
-                    $requestFormData->update(['approved_by' => array_merge([$approverChecker->user_id], $requestFormData->approved_by)]);
-                }
-            } elseif ($avpFinanceRecords->isNotEmpty()) {
+            //     if (!in_array($approverChecker->user_id, $requestFormData->approved_by) && !in_array($approverChecker->user_id, $requestFormData?->noted_by ?? [])) {
+            //         $requestFormData->update(['approved_by' => array_merge([$approverChecker->user_id], $requestFormData->approved_by)]);
+            //     }
+            // } else
+            if ($avpFinanceRecords->isNotEmpty()) {
                 $avpStaffs = $avpFinanceRecords->pluck('staff_id');
 
                 $staff = AVPFinanceStaff::query()
@@ -92,21 +93,22 @@ class RequestFormController extends Controller
                 ];
                 $level++;
             }
-        } else {
-            $approverCheckerUserId = $approverChecker?->user_id === $userId;
-
-            if ($approverChecker?->checker_id && $approverCheckerUserId) {
-                $approvalProcesses[] = [
-                    'user_id' => $approverChecker?->checker_id,
-                    'request_form_id' => $requestFormData->id,
-                    'level' => $level,
-                    'status' => 'Pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $level++;
-            }
         }
+        //  else {
+        //     $approverCheckerUserId = $approverChecker?->user_id === $userId;
+
+        //     if ($approverChecker?->checker_id && $approverCheckerUserId) {
+        //         $approvalProcesses[] = [
+        //             'user_id' => $approverChecker?->checker_id,
+        //             'request_form_id' => $requestFormData->id,
+        //             'level' => $level,
+        //             'status' => 'Pending',
+        //             'created_at' => now(),
+        //             'updated_at' => now(),
+        //         ];
+        //         $level++;
+        //     }
+        // }
 
         // Add the AVPFinance user to the approval process
 
@@ -367,6 +369,7 @@ class RequestFormController extends Controller
                 'attachment' => json_encode($filePaths), // Ensure it's JSON encoded
                 'request_code' => $uniqueCode,
                 'branch_code' => $branchCode,
+                'kind_of_request' => $request->kind_of_request
             ]);
 
             // Helper function to handle AVPFinance users and their staff
@@ -560,7 +563,8 @@ class RequestFormController extends Controller
                 'approved_by' => $approved_by,
                 'attachment' => json_encode(array_values($attachment_paths)),
                 'status' => "Pending",
-                'currency' => $currency
+                'currency' => $currency,
+                'kind_of_request' => $request->kind_of_request
             ]);
 
             // Delete existing approval processes
@@ -731,9 +735,10 @@ class RequestFormController extends Controller
                         $q->where('form_type', 'LIKE', "%{$search}%")
                             ->orWhere('request_code', 'LIKE', "%{$search}%")
                             ->orWhereDate('created_at', $dateSearch)
+                            ->orWhere('kind_of_request', 'LIKE', "%{$search}%")
                     )
                 )
-                ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code')
+                ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code', 'kind_of_request')
                 ->with('approvalProcess')
                 ->latest('created_at')
                 ->get();
@@ -854,7 +859,8 @@ class RequestFormController extends Controller
                     'request_code' => "$branchName-$requestForm->request_code",
                     'completed_code' => $requestForm->completed_code,
                     'user'  => $requestForm->user,
-                    'approved_attachments' => $attachments
+                    'approved_attachments' => $attachments,
+                    'kind_of_request' => $requestForm->kind_of_request
                 ];
             });
 
