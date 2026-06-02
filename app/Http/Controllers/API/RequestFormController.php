@@ -345,7 +345,7 @@ class RequestFormController extends Controller
 
                 foreach ($files as $file) {
                     // change to d_drive if using trunas
-                    $filePath = $file->store('request_form_attachments', 'd_drive');
+                    $filePath = $file->store('request_form_attachments', config('app.storage_disk'));
                     if (!$filePath) {
                         DB::rollBack();
                         return response()->json([
@@ -531,7 +531,7 @@ class RequestFormController extends Controller
             if ($request->hasFile('new_attachments')) {
                 foreach ($request->file('new_attachments') as $file) {
                     $fileName = time() . '-' . $file->getClientOriginalName();
-                    $attachment_paths[] = $file->storeAs('request_form_attachments', $fileName, 'd_drive'); // Add new file paths
+                    $attachment_paths[] = $file->storeAs('request_form_attachments', $fileName, config('app.storage_disk')); // Add new file paths
                 }
             }
 
@@ -547,8 +547,8 @@ class RequestFormController extends Controller
             $removed_attachments = $request->input('removed_attachments', []);
             foreach ($removed_attachments as $path) {
                 // Delete the file from storage
-                if (Storage::disk('d_drive')->exists('request_form_attachments/' . $path)) {
-                    Storage::disk('d_drive')->delete('request_form_attachments/' . $path);
+                if (Storage::disk(config('app.storage_disk'))->exists('request_form_attachments/' . $path)) {
+                    Storage::disk(config('app.storage_disk'))->delete('request_form_attachments/' . $path);
                 }
                 // Remove from the attachment list as well
                 $attachment_paths = array_filter($attachment_paths, function ($existing_path) use ($path) {
@@ -638,7 +638,7 @@ class RequestFormController extends Controller
 
         if ($request->hasFile('attachment')) {
             foreach ($request->file('attachment') as $file) {
-                $filePath = $file->store('request_form_attachments', 'd_drive');
+                $filePath = $file->store('request_form_attachments', config('app.storage_disk'));
                 $fileName = $file->getClientOriginalName();
 
                 if (!$filePath) {

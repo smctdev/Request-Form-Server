@@ -20,7 +20,7 @@ class AttachmentController extends Controller
 
         try {
             $attachmentFile = $request->file('attachment');
-            $path = $attachmentFile->store('request_form_attachments', 'd_drive');
+            $path = $attachmentFile->store('request_form_attachments', config('app.storage_disk'));
             $filename = $attachmentFile->getClientOriginalName();
 
             $createdAttachment = Attachment::create([
@@ -44,7 +44,7 @@ class AttachmentController extends Controller
     public function getFile($filePath)
     {
         // Assuming $filePath is something like 'rattachment/l1oNfvqICCiwpxao9a8YbfaJxPlgMjpC0EPdWHJZ.png'
-        $fullPath = Storage::disk('d_drive')->path($filePath);
+        $fullPath = Storage::disk(config('app.storage_disk'))->path($filePath);
 
         if (!File::exists($fullPath)) {
             abort(404, 'File not found');
