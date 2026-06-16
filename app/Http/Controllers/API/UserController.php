@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\SignatureResetEvent;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -396,6 +397,7 @@ class UserController extends Controller
             'branch_code' => 'nullable|string',
             'branch' => 'nullable|string',
             'profile_picture' => 'nullable|image', // Ensure this validation rule is correct
+            'password' => 'nullable|string|min:6',
         ]);
 
         $user = User::find($id);
@@ -413,6 +415,10 @@ class UserController extends Controller
         $user->role = $request->input('role');
         $user->branch_code = $request->input('branch_code');
         $user->branch = $request->input('branch');
+
+        if ($request->password) {
+            $user->password = $request->input('password');
+        }
 
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
@@ -679,6 +685,23 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Signature added successfully'
+        ], 200);
+    }
+
+    public function resetSignature(User $user)
+    {
+        if (Storage::disk(config('app.storage_disk'))->exists($user?->signature ?? "") && $user->signature) {
+            Storage::disk(config('app.storage_disk'))->delete($user?->signature);
+        }
+
+        $user->update([
+            'signature' => null
+        ]);
+
+        SignatureResetEvent::dispatch($user);
+
+        return response()->json([
+            'message' => 'Signature reset successfully'
         ], 200);
     }
 }

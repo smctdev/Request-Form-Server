@@ -69,6 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete("delete-user/{id}", [UserController::class, "deleteUser"])->name('delete.user');
     Route::post("password/reset", [UserController::class, "reset"])->name("password.reset");
     Route::post("update-signature/{id}", [UserController::class, "updateSignature"])->name('update.signature');
+    Route::patch("reset-signature/{user}/reset", [UserController::class, "resetSignature"]);
     Route::delete("delete-approver/{id}", [ApproverController::class, "deleteApprover"])->name('delete-approver');
     Route::middleware('auth')->get('/view-request', [RequestFormController::class, 'index']);
     Route::middleware('auth')->get('/view-requests', [RequestFormController::class, 'viewAllRequests']);
