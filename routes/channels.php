@@ -13,3 +13,7 @@ Broadcast::channel('pendingCount.{id}', function ($user, $id) {
 Broadcast::channel("request-access.{id}", function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel("signature.reset.{id}", function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
