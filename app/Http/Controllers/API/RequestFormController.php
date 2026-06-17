@@ -1068,6 +1068,9 @@ class RequestFormController extends Controller
             'branch_code'                 => $requestReport->branchCode,
             'request_code'                => $requestReport->request_code,
             'completed_code'              => $requestReport->completed_code,
+            'requested_by'                => ($requestReport->user ? "{$requestReport->user->firstName} {$requestReport->user->lastName}" : "Unknown"),
+            'requested_signature'         => ($requestReport->user ? "{$requestReport->user->signature}" : "Unknown"),
+            'requested_position'          => ($requestReport->user ? "{$requestReport->user->position}" : "Unknown"),
             'approved_bies'               => $requestReport->approvalProcess
                 ->whereIn('user_id', $requestReport->approved_by)
                 ->map(fn($process) => [
