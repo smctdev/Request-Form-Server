@@ -841,6 +841,9 @@ class RequestFormController extends Controller
                     }
                 }
 
+
+                $acronym = $branch?->acronym;
+
                 return [
                     'id' => $requestForm->id,
                     'user_id' => $requestForm->user_id,
@@ -860,7 +863,11 @@ class RequestFormController extends Controller
                     'completed_code' => $requestForm->completed_code,
                     'user'  => $requestForm->user,
                     'approved_attachments' => $attachments,
-                    'kind_of_request' => $requestForm->kind_of_request
+                    'kind_of_request' => $requestForm->kind_of_request,
+                    'branch' => [
+                        'name' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branch?->branch_name . 'ㅤ'),
+                        'branch' => $branch?->branch
+                    ],
                 ];
             });
 
@@ -1052,6 +1059,10 @@ class RequestFormController extends Controller
             'updated_at'                  => $requestReport->updated_at,
             'user'                        => $requestReport->user,
             'currency'                    => $requestReport->currency,
+            'branch' => [
+                'name' => (($requestReport->branchCode->acronym === "HO" ? 'ㅤ' : 'ㅤ' . $requestReport->branchCode->acronym . " - ") . $requestReport->branchCode?->branch_name . 'ㅤ'),
+                'branch' => $requestReport->branchCode?->branch
+            ],
             'status'                      => $requestReport->status,
             'attachment'                  => $requestReport->attachment,
             'branch_code'                 => $requestReport->branchCode,
