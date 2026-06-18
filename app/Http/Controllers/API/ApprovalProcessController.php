@@ -352,6 +352,7 @@ class ApprovalProcessController extends Controller
                 ->select('id', 'firstName', 'lastName', 'position', 'signature', 'branch')
                 ->get()
                 ->keyBy('id');
+
             $approvalData = ApprovalProcess::whereIn('user_id', $allUserIds)
                 ->where('request_form_id', $requestForm->id)
                 ->get()
@@ -547,12 +548,13 @@ class ApprovalProcessController extends Controller
                 ->unique()
                 ->values();
 
-            $allApprovers = User::whereIn('id', $allUserIds)
+            $allApprovers = User::whereIn('id', $allUserIds ?? [])
                 ->select('id', 'firstName', 'lastName', 'position', 'signature', 'branch')
                 ->get()
                 ->keyBy('id');
-            $approvalData = ApprovalProcess::whereIn('user_id', $allUserIds)
-                ->where('request_form_id', $requestForm->id)
+
+            $approvalData = ApprovalProcess::whereIn('user_id', $allUserIds ?? [])
+                ->where('request_form_id', $requestForm?->id)
                 ->get()
                 ->keyBy('user_id');
 
