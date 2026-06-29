@@ -41,15 +41,15 @@ class ApprovalProcessController extends Controller
             ]);
         }
 
-        $currentUser = User::findOrFail($request->user_id);
+        // $currentUser = User::findOrFail($request->user_id);
 
         // Add conditional validation for VP-Staff requiring an attachment
-        if ($currentUser->position == 'Vice President') {
-            $request->validate([
-                'attachment' => 'required|array', // Ensure it's an array
-                'attachment.*' => 'required|file|mimes:png,jpg,jpeg,webp,ico,gif'
-            ]);
-        }
+        // if ($currentUser->position == 'Vice President') {
+        //     $request->validate([
+        //         'attachment' => 'required|array', // Ensure it's an array
+        //         'attachment.*' => 'required|file|mimes:png,jpg,jpeg,webp,ico,gif'
+        //     ]);
+        // }
 
         // Initialize attachment variable
         $attachmentPaths = null; // Set default to null
