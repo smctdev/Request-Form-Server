@@ -699,6 +699,7 @@ class RequestFormController extends Controller
     {
         $perPage = request("per_page") ?: 10;
         $search = request("search") ?: "";
+        $status_req = request('status', '');
         function paginateCollection($items, $perPage, $currentPage = null, $options = [])
         {
             $currentPage = $currentPage ?: LengthAwarePaginator::resolveCurrentPage();
@@ -737,6 +738,13 @@ class RequestFormController extends Controller
                             ->orWhereDate('created_at', $dateSearch)
                             ->orWhere('kind_of_request', 'LIKE', "%{$search}%")
                     )
+                )
+                ->when(
+                    $status_req !== "ALL",
+                    fn($query)
+
+                    =>
+                    $query->where('status', $status_req)
                 )
                 ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code', 'kind_of_request')
                 ->with('approvalProcess')
