@@ -461,6 +461,8 @@ class ApprovalProcessController extends Controller
 
         $perPage = request("per_page") ?: 10;
         $search = request("search") ?: "";
+        $status_req = request('status', '');
+
         function paginateCollection($items, $perPage, $currentPage = null, $options = [])
         {
             $currentPage = $currentPage ?: LengthAwarePaginator::resolveCurrentPage();
@@ -493,6 +495,12 @@ class ApprovalProcessController extends Controller
                 ->orWhere('request_code', 'LIKE', "%{$search}%")
                 ->orWhereDate("created_at", $dateSearch))))
             ->with(['requestForm.user', 'user']) // Eager load request form with user
+            ->when(
+                $status_req !== "ALL",
+                fn($query)
+                =>
+                $query->whereRelation('requestForm', 'status', $status_req)
+            )
             ->get();
 
         // Process each approval process
