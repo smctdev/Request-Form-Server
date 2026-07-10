@@ -23,7 +23,7 @@ class RegisterController extends Controller
                 "lastName" => 'required|string|max:255',
                 "contact" => 'required|string|max:255',
                 "branch_code" => 'required|string|max:255|exists:branches,id',
-                "userName" => ['required', 'string', 'max:255', 'lowercase', 'min:5', Rule::unique('users', 'userName')],
+                "userName" => ['required', 'string', 'max:255', 'lowercase', 'min:5', Rule::unique('users', 'userName'), 'alpha_dash'],
                 "email" => "required|email|unique:users,email",
                 "password" => "required|min:8",
                 "position" => 'required|string|max:255|in:' . implode(',', $positionData?->pluck('value')->toArray()),
