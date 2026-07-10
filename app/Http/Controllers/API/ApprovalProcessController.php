@@ -506,6 +506,7 @@ class ApprovalProcessController extends Controller
                 fn($query)
                 =>
                 $query->orWhereRelation('requestForm', 'status', 'Ongoing')
+                    ->where('status', 'Pending')
                     ->where('user_id', $user_id)
             )
             ->get();
