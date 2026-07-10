@@ -17,8 +17,12 @@ class CustomThrottleMiddleware
      */
     public function handle(Request $request, Closure $next, $maxAttempts, $decayMinutes): Response
     {
-        $user = User::where('email', $request->email)
-            ->orWhere('userName', $request->email)->first();
+        $user = User::whereAny([
+            'email',
+            'userName',
+            'employee_id'
+        ], $request->email)
+            ->first();
 
         if (!$user) {
             return response()->json([

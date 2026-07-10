@@ -17,6 +17,7 @@ use App\Mail\ResetPasswordMail;
 use App\Models\Branch;
 use App\Models\Position;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -391,13 +392,14 @@ class UserController extends Controller
             'lastName' => 'required|string',
             'email' => 'required|email',
             'contact' => 'required|string',
-            'userName' => 'required|string',
+            'userName' => ['required', 'string', Rule::unique('users', 'userName')->ignore($id)],
             'position' => 'required|string',
             'role' => 'required|string',
             'branch_code' => 'nullable|string',
             'branch' => 'nullable|string',
-            'profile_picture' => 'nullable|image', // Ensure this validation rule is correct
+            'profile_picture' => 'nullable|image',
             'password' => 'nullable|string|min:6',
+            'employee_id' => ['required', 'string', Rule::unique('users', 'employee_id')->ignore($id)],
         ]);
 
         $user = User::find($id);
@@ -415,6 +417,7 @@ class UserController extends Controller
         $user->role = $request->input('role');
         $user->branch_code = $request->input('branch_code');
         $user->branch = $request->input('branch');
+        $user->employee_id = $request->input('employee_id');
 
         if ($request->password) {
             $user->password = $request->input('password');

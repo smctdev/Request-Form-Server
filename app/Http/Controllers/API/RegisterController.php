@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
 {
@@ -22,9 +23,9 @@ class RegisterController extends Controller
                 "lastName" => 'required|string|max:255',
                 "contact" => 'required|string|max:255',
                 "branch_code" => 'required|string|max:255|exists:branches,id',
-                "userName" => 'required|string|max:255',
+                "userName" => ['required', 'string', 'max:255', 'lowercase', 'min:5', Rule::unique('users', 'userName')],
                 "email" => "required|email|unique:users,email",
-                "password" => "required|min:5",
+                "password" => "required|min:8",
                 "position" => 'required|string|max:255|in:' . implode(',', $positionData?->pluck('value')->toArray()),
                 "signature" => "sometimes",
                 "branch" => "required|string|max:255",
