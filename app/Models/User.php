@@ -31,7 +31,8 @@ class User extends Authenticatable
 
     protected $appends = [
         'fullName',
-        'is_admin'
+        'is_admin',
+        'is_avp_finance_staff'
     ];
 
     /**
@@ -68,6 +69,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(AVPFinanceStaff::class, 'staff_id');
     }
+
+    public function getIsAvpFinanceStaffAttribute()
+    {
+        return $this->approverStaffs()->exists();
+    }
+
     public function userApprovers()
     {
         return $this->hasMany(AVPFinanceStaff::class, 'user_id');
@@ -186,8 +193,8 @@ class User extends Authenticatable
 
 
     /**
- * The primary key for the model.
- *
- * @var string
- */
+     * The primary key for the model.
+     *
+     * @var string
+     */
 }
