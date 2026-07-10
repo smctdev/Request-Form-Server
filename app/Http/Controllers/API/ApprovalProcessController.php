@@ -494,12 +494,19 @@ class ApprovalProcessController extends Controller
             $triQuery->where('form_type', 'LIKE', "%{$search}%")
                 ->orWhere('request_code', 'LIKE', "%{$search}%")
                 ->orWhereDate("created_at", $dateSearch))))
-            ->with(['requestForm.user', 'user']) // Eager load request form with user
+            ->with(['requestForm.user', 'requestForm.branchCode', 'user']) // Eager load request form with user
             ->when(
                 $status_req !== "ALL",
                 fn($query)
                 =>
                 $query->whereRelation('requestForm', 'status', $status_req)
+            )
+            ->when(
+                $status_req === "Pending",
+                fn($query)
+                =>
+                $query->orWhereRelation('requestForm', 'status', 'Ongoing')
+                    ->where('user_id', $user_id)
             )
             ->get();
 
@@ -625,6 +632,10 @@ class ApprovalProcessController extends Controller
                 $pendingApprover = $pendingApproverr ? "{$pendingApproverr->firstName} {$pendingApproverr->lastName}" : 'No Pending Approver';
             }
 
+            if (!$approvalProcess->requestForm) {
+                return;
+            }
+
             return [
                 'id' => $requestForm?->id,
                 'form_type' => $requestForm?->form_type,
@@ -645,12 +656,14 @@ class ApprovalProcessController extends Controller
                 'attachment' => $requestForm?->attachment,
                 'branch' => [
                     'name' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branchNa?->branch_name . 'ㅤ'),
-                    'branch' => $branchNa?->branch
+                    'branch' => $branchNa?->branch,
+                    'acronym' => $acronym
                 ],
                 'request_code' => "{$branchName}-{$requestForm?->request_code}",
                 'approved_attachment' => $attachments,
                 'completed_code' => $requestForm?->completed_code,
-                'created_at' => $requestForm?->created_at
+                'created_at' => $requestForm?->created_at,
+                'user_requested' => $approvalProcess?->requestForm?->branchCode?->branch_code,
             ];
         })
             ->filter()
