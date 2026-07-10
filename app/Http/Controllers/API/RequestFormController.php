@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Notifications\ApprovalProcessNotification;
 use App\Events\NotificationEvent;
@@ -78,20 +79,23 @@ class RequestFormController extends Controller
             if ($avpFinanceRecords->isNotEmpty()) {
                 $avpStaffs = $avpFinanceRecords->pluck('staff_id');
 
+
                 $staff = AVPFinanceStaff::query()
                     ->whereIn('staff_id', $avpStaffs)
                     ->whereJsonContains('branch_id', (int) $branchId)
                     ->first();
 
-                $approvalProcesses[] = [
-                    'user_id' => $staff->staff_id,
-                    'request_form_id' => $requestFormData->id,
-                    'level' => $level,
-                    'status' => 'Pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $level++;
+                if ($staff) {
+                    $approvalProcesses[] = [
+                        'user_id' => $staff?->staff_id,
+                        'request_form_id' => $requestFormData->id,
+                        'level' => $level,
+                        'status' => 'Pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                    $level++;
+                }
             }
         }
         //  else {
@@ -345,7 +349,8 @@ class RequestFormController extends Controller
 
                 foreach ($files as $file) {
                     // change to d_drive if using trunas
-                    $filePath = $file->store('request_form_attachments', config('app.storage_disk'));
+                    $file_name = Str::beforeLast($file->getClientOriginalName(), '.') . '-' . time() . '.' . $file->getClientOriginalExtension();
+                    $filePath = $file->storeAs('request_form_attachments', $file_name, config('app.storage_disk'));
                     if (!$filePath) {
                         DB::rollBack();
                         return response()->json([
@@ -530,8 +535,8 @@ class RequestFormController extends Controller
 
             if ($request->hasFile('new_attachments')) {
                 foreach ($request->file('new_attachments') as $file) {
-                    $fileName = time() . '-' . $file->getClientOriginalName();
-                    $attachment_paths[] = $file->storeAs('request_form_attachments', $fileName, config('app.storage_disk')); // Add new file paths
+                    $file_name = Str::beforeLast($file->getClientOriginalName(), '.') . '-' . time() . '.' . $file->getClientOriginalExtension();
+                    $attachment_paths[] = $file->storeAs('request_form_attachments', $file_name, config('app.storage_disk')); // Add new file paths
                 }
             }
 
