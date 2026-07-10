@@ -731,7 +731,7 @@ class RequestFormController extends Controller
             }
 
             // Fetch request forms where user_id matches the current user's ID
-            $requestForms = RequestForm::with('user.branch')
+            $requestForms = RequestForm::with(['user.branch', 'approvalProcess', 'branchCode'])
                 ->where('user_id', $currentUserId)
                 ->when(
                     $search,
@@ -751,8 +751,7 @@ class RequestFormController extends Controller
                     =>
                     $query->where('status', $status_req)
                 )
-                ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code', 'kind_of_request')
-                ->with('approvalProcess')
+                ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code', 'kind_of_request', 'branch_code')
                 ->latest('created_at')
                 ->get();
 
@@ -881,6 +880,7 @@ class RequestFormController extends Controller
                         'name' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branch?->branch_name . 'ㅤ'),
                         'branch' => $branch?->branch
                     ],
+                    'user_requested' => $requestForm?->branchCode?->branch_code
                 ];
             });
 
