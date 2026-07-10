@@ -5,11 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\RateLimiter;
 
 class LoginController extends Controller
 {
@@ -35,13 +32,17 @@ class LoginController extends Controller
             abort(226, 'You are already logged in.');
         }
 
-        $user = User::where('email', $request->email)
-            ->orWhere('userName', $request->email)->first();
+        $user = User::whereAny([
+            'email',
+            'userName',
+            'employee_id'
+        ], $request->email)
+            ->first();
 
         if (!$user) {
             return response()->json([
                 'status'        =>          false,
-                'message'       =>          'We couldn\'t find an account with that email.',
+                'message'       =>          'We couldn\'t find an account with that email or username or employee id.',
             ], 403);
         }
 
