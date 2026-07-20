@@ -185,6 +185,16 @@ class User extends Authenticatable
         );
     }
 
+    public function branchCode()
+    {
+        return $this->belongsTo(Branch::class, 'branch_code');
+    }
+
+    public function sharedRequests()
+    {
+        return $this->belongsToMany(RequestForm::class, 'shared_requests');
+    }
+
     /**
      * The default values for attributes.
      *
