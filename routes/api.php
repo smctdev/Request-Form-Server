@@ -24,6 +24,7 @@ use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\PositionController;
 use App\Http\Controllers\API\RequestAccessController;
+use App\Http\Controllers\API\ShareController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\Test\PusherController;
 use App\Models\User;
@@ -178,4 +179,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('approver-checkers', ApproverCheckerController::class);
 
     Route::get('approver-checkers-select', [ApproverCheckerController::class, 'approverCheckers']);
+
+    // SHARE REQUESTS
+    Route::apiResource('/shared-requests', ShareController::class);
+    Route::get('lists-of-users-to-share-request', [ShareController::class, 'listsOfUsersToShareRequest']);
+    Route::delete('shared-requests/{shared_request}/{user_id}/delete', [ShareController::class, 'destroyByRequestId']);
 });
