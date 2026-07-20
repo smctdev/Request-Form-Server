@@ -75,4 +75,9 @@ class RequestForm extends Model
     {
         return $this->belongsTo(Branch::class, 'branch_code');
     }
+
+    public function sharedUsers()
+    {
+        return $this->belongsToMany(User::class, 'shared_requests');
+    }
 }
