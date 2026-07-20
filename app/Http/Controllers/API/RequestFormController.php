@@ -731,7 +731,7 @@ class RequestFormController extends Controller
             }
 
             // Fetch request forms where user_id matches the current user's ID
-            $requestForms = RequestForm::with(['user.branch', 'approvalProcess', 'branchCode'])
+            $requestForms = RequestForm::with(['user', 'user.branch', 'approvalProcess', 'branchCode'])
                 ->where('user_id', $currentUserId)
                 ->when(
                     $search,
@@ -752,6 +752,7 @@ class RequestFormController extends Controller
                     $query->where('status', $status_req)
                 )
                 ->select('id', 'user_id', 'form_type', 'form_data', 'status', 'currency', 'noted_by', 'approved_by', 'attachment', 'request_code', 'created_at', 'completed_code', 'kind_of_request', 'branch_code')
+                ->withCount('sharedUsers as total_shared')
                 ->latest('created_at')
                 ->get();
 
@@ -880,7 +881,8 @@ class RequestFormController extends Controller
                         'name' => (($acronym === "HO" ? 'ㅤ' : 'ㅤ' . $acronym . " - ") . $branch?->branch_name . 'ㅤ'),
                         'branch' => $branch?->branch
                     ],
-                    'user_requested' => $requestForm?->branchCode?->branch_code
+                    'user_requested' => $requestForm?->branchCode?->branch_code,
+                    'total_shared' => $requestForm?->total_shared ?? 0
                 ];
             });
 
@@ -1072,9 +1074,9 @@ class RequestFormController extends Controller
             'updated_at'                  => $requestReport->updated_at,
             'user'                        => $requestReport->user,
             'currency'                    => $requestReport->currency,
-            'branch' => [
-                'name' => (($requestReport->branchCode->acronym === "HO" ? 'ㅤ' : 'ㅤ' . $requestReport->branchCode->acronym . " - ") . $requestReport->branchCode?->branch_name . 'ㅤ'),
-                'branch' => $requestReport->branchCode?->branch
+            'branch'                      => [
+                'name'                    => (($requestReport->branchCode->acronym === "HO" ? 'ㅤ' : 'ㅤ' . $requestReport->branchCode->acronym . " - ") . $requestReport->branchCode?->branch_name . 'ㅤ'),
+                'branch'                  => $requestReport->branchCode?->branch
             ],
             'status'                      => $requestReport->status,
             'attachment'                  => $requestReport->attachment,
@@ -1086,7 +1088,7 @@ class RequestFormController extends Controller
             'requested_position'          => ($requestReport->user ? "{$requestReport->user->position}" : "Unknown"),
             'approved_bies'               => $requestReport->approvalProcess
                 ->whereIn('user_id', $requestReport->approved_by)
-                ->map(fn($process) => [
+                ->map(fn($process)        => [
                     'comment'             => $process->comment,
                     'firstName'           => $process->user->firstName,
                     'lastName'            => $process->user->lastName,
@@ -1098,7 +1100,7 @@ class RequestFormController extends Controller
                 ->values(),
             'noted_bies'                  => $requestReport->approvalProcess
                 ->whereIn('user_id', $requestReport->noted_by)
-                ->map(fn($process) => [
+                ->map(fn($process)        => [
                     'comment'             => $process->comment,
                     'firstName'           => $process->user->firstName,
                     'lastName'            => $process->user->lastName,

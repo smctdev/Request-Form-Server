@@ -8,14 +8,14 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NotifyAllUsersNotification extends Notification implements ShouldQueue
+class SharedRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public $message, public $from, public $title, public $type)
+    public function __construct(public string $message, public string | int $request_id, public string $title, public string $request_code)
     {
         //
     }
@@ -27,7 +27,7 @@ class NotifyAllUsersNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return ['broadcast', 'database'];
     }
 
     /**
@@ -49,27 +49,20 @@ class NotifyAllUsersNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
-        ];
-    }
-
-    public function toDatabase($notifiable)
-    {
-        return [
-            'message'   => $this->message,
-            'from'      => $this->from,
-            'title'     => $this->title,
-            'type'      => $this->type
+            'message'      => $this->message,
+            'request_id'   => $this->request_id,
+            'title'        => $this->title,
+            'request_code' => $this->request_code,
         ];
     }
 
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
-            'message'   => $this->message,
-            'from'      => $this->from,
-            'title'     => $this->title,
-            'type'      => $this->type
+            'message'      => $this->message,
+            'request_id'   => $this->request_id,
+            'title'        => $this->title,
+            'request_code' => $this->request_code,
         ]);
     }
 }
