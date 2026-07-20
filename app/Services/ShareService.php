@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Status;
 use App\Models\RequestForm;
 use App\Models\User;
 use App\Notifications\SharedRequestNotification;
@@ -120,6 +121,10 @@ class ShareService
     public function storeSharedRequest($request)
     {
         $request_form = RequestForm::findOrFail($request->request_id);
+
+        if ($request_form->status !== 'Completed') {
+            abort(400, 'Ops! This request is not completed yet!');
+        }
 
         $request_form->sharedUsers()->syncWithoutDetaching($request->user_ids);
 
