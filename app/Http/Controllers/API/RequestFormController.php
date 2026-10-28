@@ -800,6 +800,7 @@ class RequestFormController extends Controller
                                 'lastName' => $user->lastName,
                                 'status' => $approval->status ?? '',
                                 'comment' => $approval->comment ?? '',
+                                'updated_at' => $approval->updated_at ?? '',
                                 'position' => $user->position,
                                 'signature' => $user->signature,
                                 'user' => $user
@@ -821,6 +822,7 @@ class RequestFormController extends Controller
                                 'lastName' => $user->lastName,
                                 'status' => $approval->status ?? '',
                                 'comment' => $approval->comment ?? '',
+                                'updated_at' => $approval->updated_at ?? '',
                                 'position' => $user->position,
                                 'signature' => $user->signature,
                                 'user' => $user
@@ -1124,7 +1126,8 @@ class RequestFormController extends Controller
                     'lastName'            => $process->user->lastName,
                     'position'            => $process->user->position,
                     'signature'           => $process->user->signature,
-                    'status'              => $process->status
+                    'status'              => $process->status,
+                    'updated_at'          => $process->updated_at
 
                 ])
                 ->values(),
@@ -1136,8 +1139,8 @@ class RequestFormController extends Controller
                     'lastName'            => $process->user->lastName,
                     'position'            => $process->user->position,
                     'signature'           => $process->user->signature,
-                    'status'              => $process->status
-
+                    'status'              => $process->status,
+                    'updated_at'          => $process->updated_at
                 ])
                 ->values(),
             'approval_process'            => $requestReport->approvalProcess->whereNotNull('comment')->values(),
