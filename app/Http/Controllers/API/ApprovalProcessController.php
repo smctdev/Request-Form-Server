@@ -495,7 +495,7 @@ class ApprovalProcessController extends Controller
         // try {
         // Retrieve all approval processes where the current user is involved
         $approvalProcesses = ApprovalProcess::where('user_id', $user_id)
-            ->whereDoesntHaveRelation('requestForm', 'status', 'Canceled')
+            //->whereDoesntHaveRelation('requestForm', 'status', 'Canceled')
             ->orderBy('level')
             ->when($search, fn($query) =>
             $query->where(fn($subQuery) =>
