@@ -232,8 +232,8 @@ class ApproverController extends Controller
     public function getApprovers($userId)
     {
 
-        $dsmtId = Branch::where('branch_code', 'DSMT')
-            ->value('id');
+        // $dsmtId = Branch::where('branch_code', 'DSMT')
+        //     ->value('id');
 
         // Return an error if an exception occurs
         try {
@@ -256,7 +256,7 @@ class ApproverController extends Controller
             $requesterBranch = (int) $requester->branch_code;
 
             $sameBranchApprovers = User::with('approverStaffs')
-                ->whereIn('branch_code', [$requesterBranch, $dsmtId])
+                ->where('branch_code', $requesterBranch)
                 ->whereDoesntHave('approverStaffs')
                 ->where('role', 'approver')
                 ->doesntHave('approverStaffs')
@@ -313,8 +313,8 @@ class ApproverController extends Controller
     public function getApproversData($userId)
     {
 
-        $dsmtId = Branch::where('branch_code', 'DSMT')
-            ->value('id');
+        // $dsmtId = Branch::where('branch_code', 'DSMT')
+        //     ->value('id');
 
         // Return an error if an exception occurs
         try {
@@ -337,7 +337,7 @@ class ApproverController extends Controller
             $requesterBranch = (int) $requester->branch_code;
 
             $sameBranchApprovers = User::with('approverStaffs')
-                ->whereIn('branch_code', [$requesterBranch, $dsmtId])
+                ->where('branch_code', $requesterBranch)
                 ->whereDoesntHave('approverStaffs')
                 ->whereDoesntHave('checkers')
                 ->where('role', 'approver')
